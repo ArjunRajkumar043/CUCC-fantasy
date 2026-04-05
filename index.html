@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cricket Fantasy XI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  /* ── TOKENS ─────────────────────────────────────────────── */
+  :root {
+    --cream:    #F5F0E8;
+    --dark:     #1A1A14;
+    --green:    #2D5016;
+    --green-l:  #3D6B20;
+    --lime:     #8BBF3C;
+    --gold:     #C9A84C;
+    --gold-l:   #E8C97A;
+    --red:      #C0392B;
+    --red-l:    #E8564A;
+    --ink:      #2C2C20;
+    --muted:    #6B6B54;
+    --rule:     rgba(45,80,22,0.15);
+    --sans:     'DM Sans', sans-serif;
+    --serif:    'Playfair Display', serif;
+    --mono:     'DM Mono', monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--cream);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* Pitch texture overlay */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 38px,
+        rgba(45,80,22,0.04) 38px,
+        rgba(45,80,22,0.04) 40px
+      );
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── HEADER ─────────────────────────────────────────────── */
+  header {
+    background: var(--green);
+    color: var(--cream);
+    padding: 28px 40px 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  header::after {
+    content: '🏏';
+    position: absolute;
+    right: 36px; top: 50%;
+    transform: translateY(-50%) rotate(-20deg);
+    font-size: 72px;
+    opacity: 0.12;
+  }
+  .header-top {
+    display: flex;
+    align-items: flex-end;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  header h1 {
+    font-family: var(--serif);
+    font-size: clamp(26px, 4vw, 38px);
+    font-weight: 900;
+    letter-spacing: -0.5px;
+    line-height: 1;
+    color: var(--cream);
+  }
+  header h1 span { color: var(--lime); }
+  .header-sub {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: rgba(245,240,232,0.6);
+    padding-bottom: 2px;
+  }
+
+  /* ── BUDGET BAR ─────────────────────────────────────────── */
+  .budget-strip {
+    background: var(--dark);
+    padding: 12px 40px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .budget-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: rgba(245,240,232,0.5);
+    white-space: nowrap;
+  }
+  .budget-display {
+    font-family: var(--mono);
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--lime);
+    white-space: nowrap;
+  }
+  .budget-display.danger { color: var(--red-l); }
+  .budget-bar-track {
+    flex: 1;
+    min-width: 120px;
+    height: 6px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .budget-bar-fill {
+    height: 100%;
+    background: var(--lime);
+    border-radius: 3px;
+    transition: width 0.3s ease, background 0.3s ease;
+  }
+  .budget-bar-fill.danger { background: var(--red-l); }
+
+  .player-count {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: rgba(245,240,232,0.7);
+    white-space: nowrap;
+  }
+  .player-count strong { color: var(--cream); }
+
+  /* ── MAIN LAYOUT ─────────────────────────────────────────── */
+  .main {
+    position: relative;
+    z-index: 1;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 32px 24px 80px;
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 32px;
+    align-items: start;
+  }
+  @media (max-width: 820px) {
+    .main { grid-template-columns: 1fr; }
+    header { padding: 20px 20px 18px; }
+    .budget-strip { padding: 10px 20px; }
+  }
+
+  /* ── SECTION TITLES ──────────────────────────────────────── */
+  .section-title {
+    font-family: var(--serif);
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--green);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--rule);
+  }
+
+  /* ── FILTERS ─────────────────────────────────────────────── */
+  .filters {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .filter-btn {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border: 1.5px solid var(--rule);
+    border-radius: 20px;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .filter-btn:hover, .filter-btn.active {
+    background: var(--green);
+    border-color: var(--green);
+    color: var(--cream);
+  }
+  .search-input {
+    font-family: var(--sans);
+    font-size: 14px;
+    padding: 7px 14px;
+    border: 1.5px solid var(--rule);
+    border-radius: 20px;
+    background: white;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.15s;
+    flex: 1;
+    min-width: 160px;
+  }
+  .search-input:focus { border-color: var(--green); }
+
+  /* ── PLAYER TABLE ────────────────────────────────────────── */
+  .player-table { width: 100%; border-collapse: collapse; }
+  .player-table thead th {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 8px 10px;
+    border-bottom: 1.5px solid var(--rule);
+    text-align: left;
+  }
+  .player-table thead th:last-child { text-align: center; }
+
+  .player-row {
+    border-bottom: 1px solid var(--rule);
+    transition: background 0.12s;
+    cursor: pointer;
+  }
+  .player-row:hover { background: rgba(45,80,22,0.04); }
+  .player-row.selected { background: rgba(45,80,22,0.09); }
+  .player-row.disabled { opacity: 0.4; pointer-events: none; }
+
+  .player-row td {
+    padding: 10px 10px;
+    vertical-align: middle;
+  }
+  .player-name {
+    font-weight: 500;
+    color: var(--ink);
+  }
+  .role-badge {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 500;
+  }
+  .role-WK  { background: #FFF0D0; color: #8B6000; }
+  .role-BAT { background: #D0E8FF; color: #004C8B; }
+  .role-AR  { background: #E8D0FF; color: #5A008B; }
+  .role-BWL { background: #D0FFE4; color: #006B30; }
+
+  .player-price {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--green);
+    font-weight: 500;
+  }
+  .add-btn {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    border: 1.5px solid var(--green);
+    background: transparent;
+    color: var(--green);
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto;
+  }
+  .add-btn:hover { background: var(--green); color: var(--cream); }
+  .add-btn.selected {
+    background: var(--green); color: var(--cream); border-color: var(--green);
+  }
+  .add-btn.selected::after { content: '✓'; font-size: 13px; }
+  .add-btn:not(.selected)::after { content: '+'; }
+
+  .no-players {
+    text-align: center;
+    padding: 40px;
+    color: var(--muted);
+    font-style: italic;
+  }
+
+  /* ── SIDEBAR ─────────────────────────────────────────────── */
+  .sidebar {
+    position: sticky;
+    top: 64px;
+  }
+
+  /* Info form */
+  .card {
+    background: white;
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+    padding: 22px;
+    margin-bottom: 20px;
+  }
+  .form-group { margin-bottom: 14px; }
+  .form-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: block;
+    margin-bottom: 5px;
+  }
+  .form-input {
+    width: 100%;
+    font-family: var(--sans);
+    font-size: 14px;
+    padding: 9px 12px;
+    border: 1.5px solid var(--rule);
+    border-radius: 8px;
+    color: var(--ink);
+    background: var(--cream);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .form-input:focus { border-color: var(--green); }
+
+  /* Roles summary */
+  .roles-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .role-chip {
+    border: 1.5px solid var(--rule);
+    border-radius: 8px;
+    padding: 8px 10px;
+    text-align: center;
+  }
+  .role-chip-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: block;
+  }
+  .role-chip-count {
+    font-family: var(--serif);
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--green);
+    display: block;
+    line-height: 1.1;
+  }
+  .role-chip-range {
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--muted);
+  }
+  .role-chip.ok    { border-color: rgba(45,80,22,0.4); }
+  .role-chip.warn  { border-color: var(--gold); background: rgba(201,168,76,0.08); }
+  .role-chip.error { border-color: var(--red); background: rgba(192,57,43,0.08); }
+
+  /* Selected squad list */
+  .squad-list { list-style: none; }
+  .squad-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 0;
+    border-bottom: 1px solid var(--rule);
+    font-size: 13px;
+  }
+  .squad-item:last-child { border-bottom: none; }
+  .squad-item-name { flex: 1; font-weight: 500; }
+  .squad-captain-btn {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.5px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid var(--rule);
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.12s;
+    white-space: nowrap;
+  }
+  .squad-captain-btn.is-captain   { background: var(--gold); border-color: var(--gold); color: var(--dark); }
+  .squad-captain-btn.is-vice-cap  { background: var(--green); border-color: var(--green); color: var(--cream); }
+  .squad-remove {
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+    padding: 2px;
+    border: none;
+    background: none;
+    transition: color 0.12s;
+  }
+  .squad-remove:hover { color: var(--red); }
+  .squad-empty {
+    color: var(--muted);
+    font-style: italic;
+    font-size: 13px;
+    padding: 8px 0;
+  }
+
+  /* Caption hints */
+  .captain-hint {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 4px;
+    line-height: 1.4;
+  }
+  .gold { color: var(--gold); font-weight: 500; }
+  .gn   { color: var(--green); font-weight: 500; }
+
+  /* ── SUBMIT BUTTON ───────────────────────────────────────── */
+  .submit-btn {
+    width: 100%;
+    font-family: var(--serif);
+    font-size: 18px;
+    font-weight: 700;
+    padding: 15px;
+    border: none;
+    border-radius: 10px;
+    background: var(--green);
+    color: var(--cream);
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.3px;
+  }
+  .submit-btn:hover:not(:disabled) {
+    background: var(--green-l);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(45,80,22,0.25);
+  }
+  .submit-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  /* ── MESSAGES ────────────────────────────────────────────── */
+  .msg {
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-size: 14px;
+    margin-bottom: 16px;
+    line-height: 1.5;
+  }
+  .msg-error { background: rgba(192,57,43,0.1); border: 1px solid rgba(192,57,43,0.3); color: #7B1A10; }
+  .msg-success { background: rgba(45,80,22,0.08); border: 1px solid rgba(45,80,22,0.3); color: var(--green); }
+  .msg ul { margin: 6px 0 0 18px; }
+  .msg li { margin-bottom: 2px; }
+
+  /* ── LOADING SPINNER ─────────────────────────────────────── */
+  .spinner {
+    display: inline-block;
+    width: 16px; height: 16px;
+    border: 2px solid rgba(245,240,232,0.3);
+    border-top-color: var(--cream);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── LEADERBOARD ─────────────────────────────────────────── */
+  .tab-bar {
+    display: flex;
+    gap: 0;
+    margin-bottom: 0;
+    border-bottom: 2px solid var(--rule);
+  }
+  .tab-btn {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 10px 20px;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: all 0.15s;
+  }
+  .tab-btn.active { color: var(--green); border-bottom-color: var(--green); }
+
+  .tab-content { display: none; padding-top: 24px; }
+  .tab-content.active { display: block; }
+
+  .lb-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .lb-rank {
+    font-family: var(--serif);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--muted);
+    width: 32px;
+    text-align: center;
+  }
+  .lb-rank.gold   { color: var(--gold); }
+  .lb-rank.silver { color: #9E9E9E; }
+  .lb-rank.bronze { color: #A0623A; }
+  .lb-name { flex: 1; font-weight: 500; }
+  .lb-team { font-size: 12px; color: var(--muted); }
+  .lb-pts {
+    font-family: var(--mono);
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--green);
+  }
+  .lb-empty { color: var(--muted); font-style: italic; text-align: center; padding: 32px 0; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <div>
+      <div class="header-sub">Season 2025</div>
+      <h1>Fantasy <span>Cricket XI</span></h1>
+    </div>
+  </div>
+</header>
+
+<div class="budget-strip">
+  <span class="budget-label">Budget</span>
+  <span class="budget-display" id="budgetDisplay">£0.0 / £100</span>
+  <div class="budget-bar-track">
+    <div class="budget-bar-fill" id="budgetBar" style="width:0%"></div>
+  </div>
+  <span class="player-count"><strong id="countDisplay">0</strong> / 11 players</span>
+</div>
+
+<div class="main">
+  <!-- LEFT: player picker -->
+  <div class="left-col">
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="switchTab('pick')">Pick Players</button>
+      <button class="tab-btn" onclick="switchTab('leaderboard')">Leaderboard</button>
+    </div>
+
+    <!-- PICK TAB -->
+    <div class="tab-content active" id="tab-pick">
+      <div class="filters" style="margin-top:20px">
+        <input class="search-input" id="searchInput" type="text" placeholder="Search player..." oninput="renderTable()">
+        <button class="filter-btn active" onclick="setFilter('All',this)">All</button>
+        <button class="filter-btn" onclick="setFilter('Wicketkeeper',this)">WK</button>
+        <button class="filter-btn" onclick="setFilter('Batter',this)">BAT</button>
+        <button class="filter-btn" onclick="setFilter('All-Rounder',this)">AR</button>
+        <button class="filter-btn" onclick="setFilter('Bowler',this)">BWL</button>
+      </div>
+      <div id="tableWrap">
+        <p style="color:var(--muted);padding:40px;text-align:center;font-style:italic">Loading players…</p>
+      </div>
+    </div>
+
+    <!-- LEADERBOARD TAB -->
+    <div class="tab-content" id="tab-leaderboard">
+      <div id="lbContent">
+        <p class="lb-empty">Loading leaderboard…</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: sidebar -->
+  <div class="sidebar">
+    <!-- User info -->
+    <div class="card">
+      <div class="section-title" style="font-size:16px">Your Details</div>
+      <div class="form-group">
+        <label class="form-label" for="managerName">Your name</label>
+        <input class="form-input" id="managerName" type="text" placeholder="e.g. James Forsyth">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="managerEmail">Email address</label>
+        <input class="form-input" id="managerEmail" type="email" placeholder="you@example.com">
+      </div>
+      <div class="form-group" style="margin-bottom:0">
+        <label class="form-label" for="teamName">Team name</label>
+        <input class="form-input" id="teamName" type="text" placeholder="e.g. Wembley Wildcats XI">
+      </div>
+    </div>
+
+    <!-- Role checks -->
+    <div class="card">
+      <div class="section-title" style="font-size:16px">Roles</div>
+      <div class="roles-grid">
+        <div class="role-chip" id="chip-WK">
+          <span class="role-chip-label">Wicketkeeper</span>
+          <span class="role-chip-count" id="count-WK">0</span>
+          <span class="role-chip-range">1–4 required</span>
+        </div>
+        <div class="role-chip" id="chip-BAT">
+          <span class="role-chip-label">Batter</span>
+          <span class="role-chip-count" id="count-BAT">0</span>
+          <span class="role-chip-range">3–6 required</span>
+        </div>
+        <div class="role-chip" id="chip-AR">
+          <span class="role-chip-label">All-Rounder</span>
+          <span class="role-chip-count" id="count-AR">0</span>
+          <span class="role-chip-range">1–4 required</span>
+        </div>
+        <div class="role-chip" id="chip-BWL">
+          <span class="role-chip-label">Bowler</span>
+          <span class="role-chip-count" id="count-BWL">0</span>
+          <span class="role-chip-range">2–5 required</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Selected squad -->
+    <div class="card">
+      <div class="section-title" style="font-size:16px">Your XI</div>
+      <p class="captain-hint" style="margin-bottom:12px">
+        Click <span class="gold">C</span> for captain (×2 pts) · <span class="gn">VC</span> for vice-captain (×1.5 pts)
+      </p>
+      <ul class="squad-list" id="squadList">
+        <li class="squad-empty">No players selected yet</li>
+      </ul>
+    </div>
+
+    <!-- Submit -->
+    <div id="msgBox"></div>
+    <button class="submit-btn" id="submitBtn" onclick="submitTeam()" disabled>
+      Submit Team
+    </button>
+  </div>
+</div>
+
+<script>
+// ── CONFIG ── Set this to your deployed Apps Script URL ─────
+const API_URL = "YOUR_APPS_SCRIPT_URL_HERE";
+const BUDGET  = 100;
+const SQUAD   = 11;
+const ROLE_LIMITS = {
+  "Wicketkeeper": [1,4],
+  "Batter":       [3,6],
+  "All-Rounder":  [1,4],
+  "Bowler":       [2,5],
+};
+const ROLE_ABBR = {
+  "Wicketkeeper": "WK", "Batter": "BAT", "All-Rounder": "AR", "Bowler": "BWL"
+};
+// ────────────────────────────────────────────────────────────
+
+let allPlayers  = [];
+let selected    = new Set();      // player IDs
+let captainId   = null;
+let viceCaptainId = null;
+let activeFilter = "All";
+
+// ── INIT ─────────────────────────────────────────────────────
+async function init() {
+  await Promise.all([loadPlayers(), loadLeaderboard()]);
+}
+
+async function loadPlayers() {
+  try {
+    const res  = await apiFetch({ action: "getPlayers" });
+    if (res.success) {
+      allPlayers = res.players;
+      renderTable();
+    } else {
+      document.getElementById("tableWrap").innerHTML =
+        `<p class="no-players">Could not load players: ${res.error || "unknown error"}</p>`;
+    }
+  } catch(e) {
+    document.getElementById("tableWrap").innerHTML =
+      `<p class="no-players">API connection failed. Check the API_URL in index.html.</p>`;
+  }
+}
+
+async function loadLeaderboard() {
+  try {
+    const res = await apiFetch({ action: "getLeaderboard" });
+    renderLeaderboard(res.success ? res.leaderboard : []);
+  } catch(e) {
+    renderLeaderboard([]);
+  }
+}
+
+// ── API CALL ─────────────────────────────────────────────────
+async function apiFetch(payload) {
+  const res = await fetch(API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain" },  // text/plain avoids CORS preflight
+    body: JSON.stringify(payload),
+  });
+  return res.json();
+}
+
+// ── TABS ─────────────────────────────────────────────────────
+function switchTab(name) {
+  document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+  document.querySelectorAll(".tab-content").forEach(t => t.classList.remove("active"));
+  document.getElementById("tab-" + name).classList.add("active");
+  event.target.classList.add("active");
+}
+
+// ── FILTER ───────────────────────────────────────────────────
+function setFilter(role, btn) {
+  activeFilter = role;
+  document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  renderTable();
+}
+
+// ── RENDER PLAYER TABLE ───────────────────────────────────────
+function renderTable() {
+  const query = document.getElementById("searchInput").value.toLowerCase();
+  const filtered = allPlayers.filter(p => {
+    const roleOk = activeFilter === "All" || p.role === activeFilter;
+    const searchOk = p.name.toLowerCase().includes(query) || p.club.toLowerCase().includes(query);
+    return roleOk && searchOk;
+  });
+
+  const spent = getSpent();
+  const canAddMore = selected.size < SQUAD;
+
+  if (filtered.length === 0) {
+    document.getElementById("tableWrap").innerHTML = `<p class="no-players">No players match your search.</p>`;
+    return;
+  }
+
+  const rows = filtered.map(p => {
+    const isSel = selected.has(p.id);
+    const canAfford = (spent + p.price) <= BUDGET || isSel;
+    const disabled = (!isSel && (!canAddMore || !canAfford)) ? "disabled" : "";
+    const abbr = ROLE_ABBR[p.role] || p.role;
+    return `
+      <tr class="player-row ${isSel ? "selected" : ""} ${disabled}" onclick="togglePlayer('${p.id}')">
+        <td><span class="player-name">${p.name}</span>${p.club ? `<br><span style="font-size:11px;color:var(--muted)">${p.club}</span>` : ""}</td>
+        <td><span class="role-badge role-${abbr}">${abbr}</span></td>
+        <td class="player-price">£${p.price.toFixed(1)}</td>
+        <td><button class="add-btn ${isSel ? "selected" : ""}" tabindex="-1"></button></td>
+      </tr>`;
+  }).join("");
+
+  document.getElementById("tableWrap").innerHTML = `
+    <table class="player-table">
+      <thead>
+        <tr>
+          <th>Player</th>
+          <th>Role</th>
+          <th>Price</th>
+          <th style="text-align:center">Pick</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+}
+
+// ── TOGGLE PLAYER ─────────────────────────────────────────────
+function togglePlayer(id) {
+  if (selected.has(id)) {
+    selected.delete(id);
+    if (captainId === id)    captainId = null;
+    if (viceCaptainId === id) viceCaptainId = null;
+  } else {
+    if (selected.size >= SQUAD) return;
+    const p = allPlayers.find(x => x.id === id);
+    if (!p) return;
+    if (getSpent() + p.price > BUDGET) return;
+    selected.add(id);
+  }
+  update();
+}
+
+// ── SET CAPTAIN / VICE-CAP ────────────────────────────────────
+function setCaptain(id, e) {
+  e.stopPropagation();
+  if (captainId === id)      { captainId = null; }
+  else if (viceCaptainId === id) {
+    viceCaptainId = null;
+    captainId = id;
+  } else {
+    captainId = id;
+    if (viceCaptainId === id) viceCaptainId = null;
+  }
+  update();
+}
+function setViceCaptain(id, e) {
+  e.stopPropagation();
+  if (viceCaptainId === id)  { viceCaptainId = null; }
+  else if (captainId === id) {
+    captainId = null;
+    viceCaptainId = id;
+  } else {
+    viceCaptainId = id;
+    if (captainId === id) captainId = null;
+  }
+  update();
+}
+
+// ── UPDATE ALL UI ─────────────────────────────────────────────
+function update() {
+  updateBudget();
+  updateRoles();
+  updateSquadList();
+  renderTable();
+  updateSubmitBtn();
+}
+
+function getSpent() {
+  return [...selected].reduce((sum, id) => {
+    const p = allPlayers.find(x => x.id === id);
+    return sum + (p ? p.price : 0);
+  }, 0);
+}
+
+function updateBudget() {
+  const spent = getSpent();
+  const pct   = Math.min((spent / BUDGET) * 100, 100);
+  const danger = spent > BUDGET;
+  document.getElementById("budgetDisplay").textContent = `£${spent.toFixed(1)} / £${BUDGET}`;
+  document.getElementById("budgetDisplay").className = "budget-display" + (danger ? " danger" : "");
+  document.getElementById("budgetBar").style.width = pct + "%";
+  document.getElementById("budgetBar").className = "budget-bar-fill" + (danger ? " danger" : "");
+  document.getElementById("countDisplay").textContent = selected.size;
+}
+
+function updateRoles() {
+  const roleCounts = { Wicketkeeper:0, Batter:0, "All-Rounder":0, Bowler:0 };
+  selected.forEach(id => {
+    const p = allPlayers.find(x => x.id === id);
+    if (p && roleCounts[p.role] !== undefined) roleCounts[p.role]++;
+  });
+  const abbrs = { Wicketkeeper:"WK", Batter:"BAT", "All-Rounder":"AR", Bowler:"BWL" };
+  Object.entries(roleCounts).forEach(([role, count]) => {
+    const [min, max] = ROLE_LIMITS[role];
+    const abbr = abbrs[role];
+    document.getElementById(`count-${abbr}`).textContent = count;
+    const chip = document.getElementById(`chip-${abbr}`);
+    chip.className = "role-chip";
+    if (count >= min && count <= max) chip.classList.add("ok");
+    else if (count > 0)              chip.classList.add("warn");
+    else                             chip.classList.add("error");
+  });
+}
+
+function updateSquadList() {
+  const list = document.getElementById("squadList");
+  if (selected.size === 0) {
+    list.innerHTML = `<li class="squad-empty">No players selected yet</li>`;
+    return;
+  }
+  const items = [...selected].map(id => {
+    const p = allPlayers.find(x => x.id === id);
+    if (!p) return "";
+    const isCap  = captainId === id;
+    const isVice = viceCaptainId === id;
+    return `<li class="squad-item">
+      <span class="squad-item-name">${p.name}</span>
+      <button class="squad-captain-btn ${isCap ? "is-captain" : ""}"
+        onclick="setCaptain('${id}', event)" title="Set as captain">C</button>
+      <button class="squad-captain-btn ${isVice ? "is-vice-cap" : ""}"
+        onclick="setViceCaptain('${id}', event)" title="Set as vice-captain">VC</button>
+      <button class="squad-remove" onclick="togglePlayer('${id}')" title="Remove">×</button>
+    </li>`;
+  }).join("");
+  list.innerHTML = items;
+}
+
+function updateSubmitBtn() {
+  const ready = selected.size === SQUAD && captainId && viceCaptainId && getSpent() <= BUDGET;
+  document.getElementById("submitBtn").disabled = !ready;
+}
+
+// ── SUBMIT ───────────────────────────────────────────────────
+async function submitTeam() {
+  const name  = document.getElementById("managerName").value.trim();
+  const email = document.getElementById("managerEmail").value.trim();
+  const tname = document.getElementById("teamName").value.trim();
+  const msgBox = document.getElementById("msgBox");
+
+  if (!name || !email) {
+    msgBox.innerHTML = `<div class="msg msg-error">Please fill in your name and email address.</div>`;
+    return;
+  }
+
+  const btn = document.getElementById("submitBtn");
+  btn.disabled = true;
+  btn.innerHTML = `<span class="spinner"></span> Submitting…`;
+  msgBox.innerHTML = "";
+
+  try {
+    const res = await apiFetch({
+      action:         "submit",
+      submitterName:  name,
+      submitterEmail: email,
+      teamName:       tname || name + "'s XI",
+      playerIds:      [...selected],
+      captainId,
+      viceCaptainId,
+    });
+
+    if (res.success) {
+      msgBox.innerHTML = `<div class="msg msg-success">
+        ✓ <strong>${res.message}</strong><br>
+        Your team has been submitted. Good luck!
+      </div>`;
+      btn.textContent = "Team Submitted ✓";
+    } else {
+      const errs = res.errors
+        ? `<ul>${res.errors.map(e => `<li>${e}</li>`).join("")}</ul>`
+        : res.error || "Unknown error.";
+      msgBox.innerHTML = `<div class="msg msg-error"><strong>Submission failed:</strong>${errs}</div>`;
+      btn.disabled = false;
+      btn.textContent = "Submit Team";
+    }
+  } catch(e) {
+    msgBox.innerHTML = `<div class="msg msg-error">Network error. Please try again.</div>`;
+    btn.disabled = false;
+    btn.textContent = "Submit Team";
+  }
+}
+
+// ── LEADERBOARD ───────────────────────────────────────────────
+function renderLeaderboard(lb) {
+  const el = document.getElementById("lbContent");
+  if (!lb || lb.length === 0) {
+    el.innerHTML = `<p class="lb-empty">No scores yet — check back after the first match!</p>`;
+    return;
+  }
+  const medals = ["gold","silver","bronze"];
+  el.innerHTML = lb.map((r,i) => `
+    <div class="lb-row">
+      <span class="lb-rank ${medals[i]||""}">${r.rank}</span>
+      <div>
+        <div class="lb-name">${r.name}</div>
+        <div class="lb-team">${r.teamName}</div>
+      </div>
+      <span class="lb-pts">${r.points} pts</span>
+    </div>`).join("");
+}
+
+init();
+</script>
+</body>
+</html>
