@@ -1,577 +1,463 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Cricket Fantasy XI</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-  /* ── TOKENS ─────────────────────────────────────────────── */
-  :root {
-    --cream:    #F5F0E8;
-    --dark:     #1A1A14;
-    --green:    #2D5016;
-    --green-l:  #3D6B20;
-    --lime:     #8BBF3C;
-    --gold:     #C9A84C;
-    --gold-l:   #E8C97A;
-    --red:      #C0392B;
-    --red-l:    #E8564A;
-    --ink:      #2C2C20;
-    --muted:    #6B6B54;
-    --rule:     rgba(45,80,22,0.15);
-    --sans:     'DM Sans', sans-serif;
-    --serif:    'Playfair Display', serif;
-    --mono:     'DM Mono', monospace;
-  }
+/* ── TOKENS ──────────────────────────────────────────────────────── */
+:root {
+  --cream:    #F5F0E8;
+  --cream-2:  #EDE8DF;
+  --dark:     #1A1A14;
+  --green:    #2D5016;
+  --green-l:  #3D6B20;
+  --green-hl: rgba(45,80,22,0.08);
+  --lime:     #8BBF3C;
+  --gold:     #C9A84C;
+  --gold-bg:  rgba(201,168,76,0.12);
+  --red:      #B83227;
+  --red-bg:   rgba(184,50,39,0.09);
+  --ink:      #2C2C20;
+  --muted:    #6B6B54;
+  --faint:    #A8A892;
+  --rule:     rgba(45,80,22,0.12);
+  --surface:  #FFFFFF;
+  --sans:     'DM Sans', system-ui, sans-serif;
+  --serif:    'Playfair Display', Georgia, serif;
+  --mono:     'DM Mono', 'Courier New', monospace;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.07);
+  --shadow-md: 0 4px 14px rgba(0,0,0,0.09);
+  --t: 160ms cubic-bezier(0.16,1,0.3,1);
+}
 
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
 
-  body {
-    background: var(--cream);
-    color: var(--ink);
-    font-family: var(--sans);
-    font-size: 15px;
-    line-height: 1.6;
-    min-height: 100vh;
-  }
+body {
+  background: var(--cream);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.6;
+  min-height: 100dvh;
+  -webkit-font-smoothing: antialiased;
+}
 
-  /* Pitch texture overlay */
-  body::before {
-    content: '';
-    position: fixed; inset: 0;
-    background-image:
-      repeating-linear-gradient(
-        0deg,
-        transparent,
-        transparent 38px,
-        rgba(45,80,22,0.04) 38px,
-        rgba(45,80,22,0.04) 40px
-      );
-    pointer-events: none;
-    z-index: 0;
-  }
+/* Subtle pitch lines */
+body::before {
+  content: '';
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background-image: repeating-linear-gradient(
+    0deg, transparent, transparent 39px,
+    rgba(45,80,22,0.035) 39px, rgba(45,80,22,0.035) 40px
+  );
+}
 
-  /* ── HEADER ─────────────────────────────────────────────── */
-  header {
-    background: var(--green);
-    color: var(--cream);
-    padding: 28px 40px 24px;
-    position: relative;
-    overflow: hidden;
-  }
-  header::after {
-    content: '🏏';
-    position: absolute;
-    right: 36px; top: 50%;
-    transform: translateY(-50%) rotate(-20deg);
-    font-size: 72px;
-    opacity: 0.12;
-  }
-  .header-top {
-    display: flex;
-    align-items: flex-end;
-    gap: 16px;
-    flex-wrap: wrap;
-  }
-  header h1 {
-    font-family: var(--serif);
-    font-size: clamp(26px, 4vw, 38px);
-    font-weight: 900;
-    letter-spacing: -0.5px;
-    line-height: 1;
-    color: var(--cream);
-  }
-  header h1 span { color: var(--lime); }
-  .header-sub {
-    font-family: var(--mono);
-    font-size: 11px;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    color: rgba(245,240,232,0.6);
-    padding-bottom: 2px;
-  }
+img, svg { display: block; }
+button { cursor: pointer; font-family: inherit; }
+input  { font-family: inherit; }
 
-  /* ── BUDGET BAR ─────────────────────────────────────────── */
-  .budget-strip {
-    background: var(--dark);
-    padding: 12px 40px;
-    display: flex;
-    align-items: center;
-    gap: 24px;
-    flex-wrap: wrap;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
-  .budget-label {
-    font-family: var(--mono);
-    font-size: 11px;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    color: rgba(245,240,232,0.5);
-    white-space: nowrap;
-  }
-  .budget-display {
-    font-family: var(--mono);
-    font-size: 20px;
-    font-weight: 500;
-    color: var(--lime);
-    white-space: nowrap;
-  }
-  .budget-display.danger { color: var(--red-l); }
-  .budget-bar-track {
-    flex: 1;
-    min-width: 120px;
-    height: 6px;
-    background: rgba(255,255,255,0.1);
-    border-radius: 3px;
-    overflow: hidden;
-  }
-  .budget-bar-fill {
-    height: 100%;
-    background: var(--lime);
-    border-radius: 3px;
-    transition: width 0.3s ease, background 0.3s ease;
-  }
-  .budget-bar-fill.danger { background: var(--red-l); }
+/* ── SKIP LINK ───────────────────────────────────────────────────── */
+.skip-link {
+  position: absolute; top: -40px; left: var(--space-4);
+  background: var(--green); color: var(--cream);
+  padding: 6px 12px; border-radius: var(--radius-sm);
+  font-size: 13px; text-decoration: none; z-index: 999;
+  transition: top var(--t);
+}
+.skip-link:focus { top: 8px; }
 
-  .player-count {
-    font-family: var(--mono);
-    font-size: 13px;
-    color: rgba(245,240,232,0.7);
-    white-space: nowrap;
-  }
-  .player-count strong { color: var(--cream); }
+/* ── HEADER ──────────────────────────────────────────────────────── */
+header {
+  background: var(--green);
+  padding: 24px 40px 22px;
+  position: relative;
+  overflow: hidden;
+}
+header::after {
+  content: '🏏';
+  position: absolute; right: 40px; top: 50%;
+  transform: translateY(-50%) rotate(-20deg);
+  font-size: 68px; opacity: 0.1; pointer-events: none;
+}
+.header-inner { display: flex; align-items: flex-end; gap: 14px; flex-wrap: wrap; }
 
-  /* ── MAIN LAYOUT ─────────────────────────────────────────── */
-  .main {
-    position: relative;
-    z-index: 1;
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 32px 24px 80px;
-    display: grid;
-    grid-template-columns: 1fr 320px;
-    gap: 32px;
-    align-items: start;
-  }
-  @media (max-width: 820px) {
-    .main { grid-template-columns: 1fr; }
-    header { padding: 20px 20px 18px; }
-    .budget-strip { padding: 10px 20px; }
-  }
+/* Inline SVG logo */
+.logo-mark { color: var(--lime); flex-shrink: 0; }
 
-  /* ── SECTION TITLES ──────────────────────────────────────── */
-  .section-title {
-    font-family: var(--serif);
-    font-size: 22px;
-    font-weight: 700;
-    color: var(--green);
-    margin-bottom: 16px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .section-title::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--rule);
-  }
+.header-text {}
+.header-eyebrow {
+  font-family: var(--mono);
+  font-size: 10px; letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(245,240,232,0.5);
+  margin-bottom: 2px;
+}
+header h1 {
+  font-family: var(--serif);
+  font-size: clamp(22px, 3.5vw, 34px);
+  font-weight: 900; line-height: 1.05;
+  color: var(--cream); letter-spacing: -0.3px;
+}
+header h1 span { color: var(--lime); }
 
-  /* ── FILTERS ─────────────────────────────────────────────── */
-  .filters {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 16px;
-    flex-wrap: wrap;
-  }
-  .filter-btn {
-    font-family: var(--mono);
-    font-size: 11px;
-    letter-spacing: 0.8px;
-    text-transform: uppercase;
-    padding: 6px 14px;
-    border: 1.5px solid var(--rule);
-    border-radius: 20px;
-    background: transparent;
-    color: var(--muted);
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-  .filter-btn:hover, .filter-btn.active {
-    background: var(--green);
-    border-color: var(--green);
-    color: var(--cream);
-  }
-  .search-input {
-    font-family: var(--sans);
-    font-size: 14px;
-    padding: 7px 14px;
-    border: 1.5px solid var(--rule);
-    border-radius: 20px;
-    background: white;
-    color: var(--ink);
-    outline: none;
-    transition: border-color 0.15s;
-    flex: 1;
-    min-width: 160px;
-  }
-  .search-input:focus { border-color: var(--green); }
+/* ── STICKY BUDGET BAR ───────────────────────────────────────────── */
+.budget-strip {
+  background: var(--dark);
+  padding: 10px 40px;
+  display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
+  position: sticky; top: 0; z-index: 200;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+}
+.budget-label {
+  font-family: var(--mono); font-size: 10px;
+  letter-spacing: 1.2px; text-transform: uppercase;
+  color: rgba(245,240,232,0.45); white-space: nowrap;
+}
+.budget-figure {
+  font-family: var(--mono); font-size: 18px; font-weight: 500;
+  color: var(--lime); white-space: nowrap;
+  transition: color var(--t);
+}
+.budget-figure.over { color: #E8564A; }
+.budget-bar-track {
+  flex: 1; min-width: 100px; height: 5px;
+  background: rgba(255,255,255,0.08); border-radius: 3px; overflow: hidden;
+}
+.budget-bar-fill {
+  height: 100%; background: var(--lime); border-radius: 3px;
+  transition: width 0.35s ease, background 0.35s ease;
+}
+.budget-bar-fill.over { background: #E8564A; }
+.squad-count {
+  font-family: var(--mono); font-size: 12px;
+  color: rgba(245,240,232,0.6); white-space: nowrap;
+}
+.squad-count strong { color: var(--cream); }
 
-  /* ── PLAYER TABLE ────────────────────────────────────────── */
-  .player-table { width: 100%; border-collapse: collapse; }
-  .player-table thead th {
-    font-family: var(--mono);
-    font-size: 10px;
-    letter-spacing: 1.2px;
-    text-transform: uppercase;
-    color: var(--muted);
-    padding: 8px 10px;
-    border-bottom: 1.5px solid var(--rule);
-    text-align: left;
-  }
-  .player-table thead th:last-child { text-align: center; }
+/* ── MAIN LAYOUT ─────────────────────────────────────────────────── */
+.main {
+  position: relative; z-index: 1;
+  max-width: 1120px; margin: 0 auto;
+  padding: 28px 24px 80px;
+  display: grid;
+  grid-template-columns: 1fr 310px;
+  gap: 28px; align-items: start;
+}
+@media (max-width: 840px) {
+  .main { grid-template-columns: 1fr; }
+  header { padding: 18px 20px; }
+  header::after { display: none; }
+  .budget-strip { padding: 10px 16px; gap: 12px; }
+  .sidebar { position: static; }
+}
 
-  .player-row {
-    border-bottom: 1px solid var(--rule);
-    transition: background 0.12s;
-    cursor: pointer;
-  }
-  .player-row:hover { background: rgba(45,80,22,0.04); }
-  .player-row.selected { background: rgba(45,80,22,0.09); }
-  .player-row.disabled { opacity: 0.4; pointer-events: none; }
+/* ── TABS ────────────────────────────────────────────────────────── */
+.tab-bar {
+  display: flex; border-bottom: 2px solid var(--rule);
+  margin-bottom: 0;
+}
+.tab-btn {
+  font-family: var(--mono); font-size: 11px;
+  letter-spacing: 1px; text-transform: uppercase;
+  padding: 10px 20px; border: none; background: transparent;
+  color: var(--muted); border-bottom: 2px solid transparent;
+  margin-bottom: -2px; transition: color var(--t), border-color var(--t);
+}
+.tab-btn:hover { color: var(--green); }
+.tab-btn.active { color: var(--green); border-bottom-color: var(--green); }
+.tab-pane { display: none; padding-top: 22px; }
+.tab-pane.active { display: block; }
 
-  .player-row td {
-    padding: 10px 10px;
-    vertical-align: middle;
-  }
-  .player-name {
-    font-weight: 500;
-    color: var(--ink);
-  }
-  .role-badge {
-    display: inline-block;
-    font-family: var(--mono);
-    font-size: 9px;
-    letter-spacing: 0.8px;
-    text-transform: uppercase;
-    padding: 2px 8px;
-    border-radius: 10px;
-    font-weight: 500;
-  }
-  .role-WK  { background: #FFF0D0; color: #8B6000; }
-  .role-BAT { background: #D0E8FF; color: #004C8B; }
-  .role-AR  { background: #E8D0FF; color: #5A008B; }
-  .role-BWL { background: #D0FFE4; color: #006B30; }
+/* ── FILTERS ─────────────────────────────────────────────────────── */
+.filter-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+.filter-btn {
+  font-family: var(--mono); font-size: 10px;
+  letter-spacing: 1px; text-transform: uppercase;
+  padding: 5px 14px;
+  border: 1.5px solid var(--rule); border-radius: 20px;
+  background: transparent; color: var(--muted);
+  transition: all var(--t);
+}
+.filter-btn:hover, .filter-btn.active {
+  background: var(--green); border-color: var(--green); color: var(--cream);
+}
+.search-box {
+  flex: 1; min-width: 140px;
+  font-size: 13px; padding: 6px 14px;
+  border: 1.5px solid var(--rule); border-radius: 20px;
+  background: white; color: var(--ink); outline: none;
+  transition: border-color var(--t);
+}
+.search-box:focus { border-color: var(--green); }
 
-  .player-price {
-    font-family: var(--mono);
-    font-size: 13px;
-    color: var(--green);
-    font-weight: 500;
-  }
-  .add-btn {
-    width: 28px; height: 28px;
-    border-radius: 50%;
-    border: 1.5px solid var(--green);
-    background: transparent;
-    color: var(--green);
-    font-size: 18px;
-    line-height: 1;
-    cursor: pointer;
-    transition: all 0.15s;
-    display: flex; align-items: center; justify-content: center;
-    margin: 0 auto;
-  }
-  .add-btn:hover { background: var(--green); color: var(--cream); }
-  .add-btn.selected {
-    background: var(--green); color: var(--cream); border-color: var(--green);
-  }
-  .add-btn.selected::after { content: '✓'; font-size: 13px; }
-  .add-btn:not(.selected)::after { content: '+'; }
+/* ── PLAYER TABLE ────────────────────────────────────────────────── */
+.player-table { width: 100%; border-collapse: collapse; }
+.player-table thead th {
+  font-family: var(--mono); font-size: 9px;
+  letter-spacing: 1.3px; text-transform: uppercase;
+  color: var(--faint); padding: 7px 10px;
+  border-bottom: 1.5px solid var(--rule); text-align: left;
+}
+.player-table thead th.center { text-align: center; }
 
-  .no-players {
-    text-align: center;
-    padding: 40px;
-    color: var(--muted);
-    font-style: italic;
-  }
+.prow {
+  border-bottom: 1px solid var(--rule);
+  transition: background var(--t); cursor: pointer;
+}
+.prow:hover { background: var(--green-hl); }
+.prow.sel   { background: rgba(45,80,22,0.07); }
+.prow.dim   { opacity: 0.38; pointer-events: none; }
+.prow td    { padding: 9px 10px; vertical-align: middle; }
 
-  /* ── SIDEBAR ─────────────────────────────────────────────── */
-  .sidebar {
-    position: sticky;
-    top: 64px;
-  }
+.p-name  { font-weight: 500; color: var(--ink); font-size: 14px; }
+.p-squad { font-size: 11px; color: var(--muted); margin-top: 1px; }
 
-  /* Info form */
-  .card {
-    background: white;
-    border: 1px solid var(--rule);
-    border-radius: 12px;
-    padding: 22px;
-    margin-bottom: 20px;
-  }
-  .form-group { margin-bottom: 14px; }
-  .form-label {
-    font-family: var(--mono);
-    font-size: 10px;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    color: var(--muted);
-    display: block;
-    margin-bottom: 5px;
-  }
-  .form-input {
-    width: 100%;
-    font-family: var(--sans);
-    font-size: 14px;
-    padding: 9px 12px;
-    border: 1.5px solid var(--rule);
-    border-radius: 8px;
-    color: var(--ink);
-    background: var(--cream);
-    outline: none;
-    transition: border-color 0.15s;
-  }
-  .form-input:focus { border-color: var(--green); }
+.role-badge {
+  display: inline-block; font-family: var(--mono);
+  font-size: 9px; letter-spacing: 0.8px; text-transform: uppercase;
+  padding: 2px 7px; border-radius: 10px; font-weight: 500;
+}
+.r-WK  { background: #FFF0D0; color: #7A5200; }
+.r-BAT { background: #D4EAFF; color: #003F7A; }
+.r-AR  { background: #EAD4FF; color: #4A007A; }
+.r-BWL { background: #D4FFE8; color: #005A28; }
 
-  /* Roles summary */
-  .roles-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-    margin-bottom: 16px;
-  }
-  .role-chip {
-    border: 1.5px solid var(--rule);
-    border-radius: 8px;
-    padding: 8px 10px;
-    text-align: center;
-  }
-  .role-chip-label {
-    font-family: var(--mono);
-    font-size: 9px;
-    letter-spacing: 0.8px;
-    text-transform: uppercase;
-    color: var(--muted);
-    display: block;
-  }
-  .role-chip-count {
-    font-family: var(--serif);
-    font-size: 22px;
-    font-weight: 700;
-    color: var(--green);
-    display: block;
-    line-height: 1.1;
-  }
-  .role-chip-range {
-    font-family: var(--mono);
-    font-size: 9px;
-    color: var(--muted);
-  }
-  .role-chip.ok    { border-color: rgba(45,80,22,0.4); }
-  .role-chip.warn  { border-color: var(--gold); background: rgba(201,168,76,0.08); }
-  .role-chip.error { border-color: var(--red); background: rgba(192,57,43,0.08); }
+.p-price { font-family: var(--mono); font-size: 13px; color: var(--green); font-weight: 500; }
 
-  /* Selected squad list */
-  .squad-list { list-style: none; }
-  .squad-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 7px 0;
-    border-bottom: 1px solid var(--rule);
-    font-size: 13px;
-  }
-  .squad-item:last-child { border-bottom: none; }
-  .squad-item-name { flex: 1; font-weight: 500; }
-  .squad-captain-btn {
-    font-family: var(--mono);
-    font-size: 9px;
-    letter-spacing: 0.5px;
-    padding: 2px 6px;
-    border-radius: 4px;
-    border: 1px solid var(--rule);
-    background: transparent;
-    color: var(--muted);
-    cursor: pointer;
-    transition: all 0.12s;
-    white-space: nowrap;
-  }
-  .squad-captain-btn.is-captain   { background: var(--gold); border-color: var(--gold); color: var(--dark); }
-  .squad-captain-btn.is-vice-cap  { background: var(--green); border-color: var(--green); color: var(--cream); }
-  .squad-remove {
-    color: var(--muted);
-    cursor: pointer;
-    font-size: 16px;
-    line-height: 1;
-    padding: 2px;
-    border: none;
-    background: none;
-    transition: color 0.12s;
-  }
-  .squad-remove:hover { color: var(--red); }
-  .squad-empty {
-    color: var(--muted);
-    font-style: italic;
-    font-size: 13px;
-    padding: 8px 0;
-  }
+.pick-btn {
+  width: 26px; height: 26px; border-radius: 50%;
+  border: 1.5px solid var(--green); background: transparent;
+  color: var(--green); display: flex; align-items: center; justify-content: center;
+  margin: 0 auto; font-size: 16px; font-weight: 700;
+  transition: all var(--t); line-height: 1;
+}
+.pick-btn:hover  { background: var(--green); color: var(--cream); }
+.pick-btn.on     { background: var(--green); color: var(--cream); }
 
-  /* Caption hints */
-  .captain-hint {
-    font-size: 12px;
-    color: var(--muted);
-    margin-top: 4px;
-    line-height: 1.4;
-  }
-  .gold { color: var(--gold); font-weight: 500; }
-  .gn   { color: var(--green); font-weight: 500; }
+.tbl-empty {
+  text-align: center; padding: 40px 20px;
+  color: var(--muted); font-style: italic; font-size: 14px;
+}
 
-  /* ── SUBMIT BUTTON ───────────────────────────────────────── */
-  .submit-btn {
-    width: 100%;
-    font-family: var(--serif);
-    font-size: 18px;
-    font-weight: 700;
-    padding: 15px;
-    border: none;
-    border-radius: 10px;
-    background: var(--green);
-    color: var(--cream);
-    cursor: pointer;
-    transition: all 0.2s;
-    letter-spacing: 0.3px;
-  }
-  .submit-btn:hover:not(:disabled) {
-    background: var(--green-l);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 16px rgba(45,80,22,0.25);
-  }
-  .submit-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
-  }
+/* ── LEADERBOARD ─────────────────────────────────────────────────── */
+.lb-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 0; border-bottom: 1px solid var(--rule);
+}
+.lb-row:last-child { border-bottom: none; }
+.lb-rank {
+  font-family: var(--serif); font-size: 19px; font-weight: 700;
+  color: var(--faint); width: 30px; text-align: center; flex-shrink: 0;
+}
+.lb-rank.g { color: var(--gold); }
+.lb-rank.s { color: #9E9E9E; }
+.lb-rank.b { color: #A06040; }
+.lb-info { flex: 1; }
+.lb-name { font-weight: 500; font-size: 14px; }
+.lb-team { font-size: 12px; color: var(--muted); }
+.lb-pts  { font-family: var(--mono); font-size: 15px; font-weight: 500; color: var(--green); }
+.lb-empty { color: var(--muted); font-style: italic; text-align: center; padding: 36px 0; font-size: 14px; }
 
-  /* ── MESSAGES ────────────────────────────────────────────── */
-  .msg {
-    border-radius: 10px;
-    padding: 14px 16px;
-    font-size: 14px;
-    margin-bottom: 16px;
-    line-height: 1.5;
-  }
-  .msg-error { background: rgba(192,57,43,0.1); border: 1px solid rgba(192,57,43,0.3); color: #7B1A10; }
-  .msg-success { background: rgba(45,80,22,0.08); border: 1px solid rgba(45,80,22,0.3); color: var(--green); }
-  .msg ul { margin: 6px 0 0 18px; }
-  .msg li { margin-bottom: 2px; }
+/* ── SIDEBAR ─────────────────────────────────────────────────────── */
+.sidebar { position: sticky; top: 54px; }
 
-  /* ── LOADING SPINNER ─────────────────────────────────────── */
-  .spinner {
-    display: inline-block;
-    width: 16px; height: 16px;
-    border: 2px solid rgba(245,240,232,0.3);
-    border-top-color: var(--cream);
-    border-radius: 50%;
-    animation: spin 0.7s linear infinite;
-    vertical-align: middle;
-    margin-right: 6px;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
+.card {
+  background: var(--surface); border: 1px solid var(--rule);
+  border-radius: var(--radius-lg); padding: 20px; margin-bottom: 16px;
+  box-shadow: var(--shadow-sm);
+}
 
-  /* ── LEADERBOARD ─────────────────────────────────────────── */
-  .tab-bar {
-    display: flex;
-    gap: 0;
-    margin-bottom: 0;
-    border-bottom: 2px solid var(--rule);
-  }
-  .tab-btn {
-    font-family: var(--mono);
-    font-size: 11px;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    padding: 10px 20px;
-    border: none;
-    background: transparent;
-    color: var(--muted);
-    cursor: pointer;
-    border-bottom: 2px solid transparent;
-    margin-bottom: -2px;
-    transition: all 0.15s;
-  }
-  .tab-btn.active { color: var(--green); border-bottom-color: var(--green); }
+.sec-title {
+  font-family: var(--serif); font-size: 17px; font-weight: 700;
+  color: var(--green); margin-bottom: 14px;
+  display: flex; align-items: center; gap: 8px;
+}
+.sec-title::after { content: ''; flex: 1; height: 1px; background: var(--rule); }
 
-  .tab-content { display: none; padding-top: 24px; }
-  .tab-content.active { display: block; }
+/* Form */
+.form-group { margin-bottom: 12px; }
+.form-group:last-child { margin-bottom: 0; }
+.form-label {
+  display: block; font-family: var(--mono); font-size: 9px;
+  letter-spacing: 1.2px; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 4px;
+}
+.form-input {
+  width: 100%; font-size: 14px;
+  padding: 8px 11px; border: 1.5px solid var(--rule);
+  border-radius: var(--radius-sm); color: var(--ink);
+  background: var(--cream); outline: none;
+  transition: border-color var(--t);
+}
+.form-input:focus { border-color: var(--green); }
+.form-input.err   { border-color: var(--red); }
 
-  .lb-row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 10px 0;
-    border-bottom: 1px solid var(--rule);
-  }
-  .lb-rank {
-    font-family: var(--serif);
-    font-size: 20px;
-    font-weight: 700;
-    color: var(--muted);
-    width: 32px;
-    text-align: center;
-  }
-  .lb-rank.gold   { color: var(--gold); }
-  .lb-rank.silver { color: #9E9E9E; }
-  .lb-rank.bronze { color: #A0623A; }
-  .lb-name { flex: 1; font-weight: 500; }
-  .lb-team { font-size: 12px; color: var(--muted); }
-  .lb-pts {
-    font-family: var(--mono);
-    font-size: 15px;
-    font-weight: 500;
-    color: var(--green);
-  }
-  .lb-empty { color: var(--muted); font-style: italic; text-align: center; padding: 32px 0; }
+/* Roles grid */
+.roles-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 4px; }
+.role-chip {
+  border: 1.5px solid var(--rule); border-radius: var(--radius-md);
+  padding: 9px 10px; text-align: center;
+  transition: border-color var(--t), background var(--t);
+}
+.role-chip-label {
+  font-family: var(--mono); font-size: 8px; letter-spacing: 1px;
+  text-transform: uppercase; color: var(--muted); display: block;
+}
+.role-chip-count {
+  font-family: var(--serif); font-size: 22px; font-weight: 700;
+  color: var(--green); display: block; line-height: 1.15;
+}
+.role-chip-range { font-family: var(--mono); font-size: 8px; color: var(--faint); }
+.role-chip.ok    { border-color: rgba(45,80,22,0.35); }
+.role-chip.warn  { border-color: var(--gold); background: var(--gold-bg); }
+.role-chip.err   { border-color: var(--red);  background: var(--red-bg); }
+
+/* Squad list */
+.squad-list { list-style: none; }
+.squad-item {
+  display: flex; align-items: center; gap: 6px;
+  padding: 7px 0; border-bottom: 1px solid var(--rule);
+  font-size: 13px;
+}
+.squad-item:last-child { border-bottom: none; }
+.squad-item-name { flex: 1; font-weight: 500; line-height: 1.2; }
+.squad-item-squad { font-size: 10px; color: var(--muted); display: block; }
+
+.cap-btn {
+  font-family: var(--mono); font-size: 9px; letter-spacing: 0.5px;
+  padding: 2px 7px; border-radius: 4px;
+  border: 1px solid var(--rule); background: transparent;
+  color: var(--muted); transition: all var(--t); white-space: nowrap;
+}
+.cap-btn:hover     { border-color: var(--gold); color: var(--gold); }
+.cap-btn.is-cap    { background: var(--gold); border-color: var(--gold); color: var(--dark); font-weight: 500; }
+.cap-btn.is-vc     { background: var(--green); border-color: var(--green); color: var(--cream); }
+
+.remove-btn {
+  color: var(--faint); font-size: 18px; line-height: 1; padding: 1px 3px;
+  border: none; background: none; transition: color var(--t);
+}
+.remove-btn:hover { color: var(--red); }
+
+.squad-empty { color: var(--muted); font-style: italic; font-size: 13px; padding: 6px 0; }
+.cap-hint { font-size: 11px; color: var(--muted); margin-bottom: 12px; line-height: 1.45; }
+.cap-hint .g { color: var(--gold); font-weight: 600; }
+
+/* Min-per-squad notice */
+.squad-tally {
+  margin-top: 12px; font-size: 11px; color: var(--muted); line-height: 1.5;
+}
+.squad-tally span.ok  { color: var(--green); font-weight: 500; }
+.squad-tally span.bad { color: var(--red); font-weight: 500; }
+
+/* Submit */
+.submit-btn {
+  width: 100%;
+  font-family: var(--serif); font-size: 17px; font-weight: 700;
+  padding: 14px; border: none; border-radius: var(--radius-md);
+  background: var(--green); color: var(--cream);
+  transition: background var(--t), transform var(--t), box-shadow var(--t);
+  letter-spacing: 0.2px;
+}
+.submit-btn:hover:not(:disabled) {
+  background: var(--green-l);
+  transform: translateY(-1px);
+  box-shadow: 0 5px 18px rgba(45,80,22,0.28);
+}
+.submit-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.submit-btn.done { background: #437a22; cursor: default; }
+
+.spinner {
+  display: inline-block; width: 14px; height: 14px;
+  border: 2px solid rgba(245,240,232,0.3);
+  border-top-color: var(--cream); border-radius: 50%;
+  animation: spin 0.65s linear infinite;
+  vertical-align: middle; margin-right: 6px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Messages */
+.msg {
+  border-radius: var(--radius-md); padding: 12px 14px;
+  font-size: 13px; margin-bottom: 14px; line-height: 1.5;
+}
+.msg-err { background: var(--red-bg); border: 1px solid rgba(184,50,39,0.25); color: #7B1A10; }
+.msg-ok  { background: var(--green-hl); border: 1px solid rgba(45,80,22,0.3); color: var(--green); }
+.msg ul  { margin: 6px 0 0 16px; }
+.msg li  { margin-bottom: 3px; }
+
+/* Loading skeleton */
+.skeleton {
+  background: linear-gradient(90deg, var(--cream-2) 25%, #e8e3da 50%, var(--cream-2) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+  border-radius: var(--radius-sm); height: 1em;
+  margin-bottom: 10px;
+}
+@keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
+
+@media (max-width: 420px) {
+  .budget-strip { gap: 8px; }
+  .budget-bar-track { display: none; }
+}
 </style>
 </head>
 <body>
 
+<a class="skip-link" href="#main">Skip to main content</a>
+
 <header>
-  <div class="header-top">
-    <div>
-      <div class="header-sub">Season 2025</div>
+  <div class="header-inner">
+    <!-- SVG Cricket stumps logo -->
+    <svg class="logo-mark" width="36" height="44" viewBox="0 0 36 44" fill="none" aria-label="Cricket stumps logo" xmlns="http://www.w3.org/2000/svg">
+      <rect x="7"  y="8" width="4" height="30" rx="2" fill="currentColor" opacity="0.9"/>
+      <rect x="16" y="8" width="4" height="30" rx="2" fill="currentColor"/>
+      <rect x="25" y="8" width="4" height="30" rx="2" fill="currentColor" opacity="0.9"/>
+      <rect x="5"  y="6" width="10" height="3" rx="1.5" fill="currentColor" opacity="0.7"/>
+      <rect x="21" y="6" width="10" height="3" rx="1.5" fill="currentColor" opacity="0.7"/>
+    </svg>
+    <div class="header-text">
+      <div class="header-eyebrow">Season 2025</div>
       <h1>Fantasy <span>Cricket XI</span></h1>
     </div>
   </div>
 </header>
 
-<div class="budget-strip">
+<!-- Sticky budget bar -->
+<div class="budget-strip" role="status" aria-live="polite" aria-label="Budget and squad status">
   <span class="budget-label">Budget</span>
-  <span class="budget-display" id="budgetDisplay">£0.0 / £100</span>
-  <div class="budget-bar-track">
+  <span class="budget-figure" id="budgetFig">£0.0 / £100m</span>
+  <div class="budget-bar-track" aria-hidden="true">
     <div class="budget-bar-fill" id="budgetBar" style="width:0%"></div>
   </div>
-  <span class="player-count"><strong id="countDisplay">0</strong> / 11 players</span>
+  <span class="squad-count"><strong id="squadCount">0</strong> / 11 players</span>
 </div>
 
-<div class="main">
-  <!-- LEFT: player picker -->
+<div class="main" id="main">
+
+  <!-- ── LEFT: player picker ── -->
   <div class="left-col">
-    <div class="tab-bar">
-      <button class="tab-btn active" onclick="switchTab('pick')">Pick Players</button>
-      <button class="tab-btn" onclick="switchTab('leaderboard')">Leaderboard</button>
+    <div class="tab-bar" role="tablist">
+      <button class="tab-btn active" role="tab" aria-selected="true"  aria-controls="pane-pick"
+        onclick="switchTab('pick',this)">Pick Players</button>
+      <button class="tab-btn"        role="tab" aria-selected="false" aria-controls="pane-lb"
+        onclick="switchTab('lb',this)">Leaderboard</button>
     </div>
 
-    <!-- PICK TAB -->
-    <div class="tab-content active" id="tab-pick">
-      <div class="filters" style="margin-top:20px">
-        <input class="search-input" id="searchInput" type="text" placeholder="Search player..." oninput="renderTable()">
+    <!-- PICK PANE -->
+    <div class="tab-pane active" id="pane-pick" role="tabpanel">
+      <div class="filter-bar" style="margin-top:4px">
+        <input class="search-box" id="searchBox" type="search"
+          placeholder="Search player or squad…" aria-label="Search players"
+          oninput="renderTable()">
         <button class="filter-btn active" onclick="setFilter('All',this)">All</button>
         <button class="filter-btn" onclick="setFilter('Wicketkeeper',this)">WK</button>
         <button class="filter-btn" onclick="setFilter('Batter',this)">BAT</button>
@@ -579,154 +465,191 @@
         <button class="filter-btn" onclick="setFilter('Bowler',this)">BWL</button>
       </div>
       <div id="tableWrap">
-        <p style="color:var(--muted);padding:40px;text-align:center;font-style:italic">Loading players…</p>
+        <!-- skeleton -->
+        <div style="padding:8px 0">
+          <div class="skeleton" style="width:100%;height:14px"></div>
+          <div class="skeleton" style="width:90%;height:14px"></div>
+          <div class="skeleton" style="width:95%;height:14px"></div>
+          <div class="skeleton" style="width:80%;height:14px"></div>
+          <div class="skeleton" style="width:92%;height:14px"></div>
+        </div>
       </div>
     </div>
 
-    <!-- LEADERBOARD TAB -->
-    <div class="tab-content" id="tab-leaderboard">
-      <div id="lbContent">
+    <!-- LEADERBOARD PANE -->
+    <div class="tab-pane" id="pane-lb" role="tabpanel">
+      <div id="lbWrap">
         <p class="lb-empty">Loading leaderboard…</p>
       </div>
     </div>
-  </div>
+  </div><!-- /left-col -->
 
-  <!-- RIGHT: sidebar -->
-  <div class="sidebar">
-    <!-- User info -->
+  <!-- ── RIGHT: sidebar ── -->
+  <aside class="sidebar" aria-label="Team builder">
+
+    <!-- Details -->
     <div class="card">
-      <div class="section-title" style="font-size:16px">Your Details</div>
+      <div class="sec-title">Your Details</div>
       <div class="form-group">
         <label class="form-label" for="managerName">Your name</label>
-        <input class="form-input" id="managerName" type="text" placeholder="e.g. James Forsyth">
+        <input class="form-input" id="managerName" type="text" placeholder="e.g. James Smith" autocomplete="name">
       </div>
       <div class="form-group">
         <label class="form-label" for="managerEmail">Email address</label>
-        <input class="form-input" id="managerEmail" type="email" placeholder="you@example.com">
+        <input class="form-input" id="managerEmail" type="email" placeholder="you@example.com" autocomplete="email">
       </div>
-      <div class="form-group" style="margin-bottom:0">
-        <label class="form-label" for="teamName">Team name</label>
+      <div class="form-group">
+        <label class="form-label" for="teamName">Team name <span style="color:var(--faint)">(optional)</span></label>
         <input class="form-input" id="teamName" type="text" placeholder="e.g. Wembley Wildcats XI">
       </div>
     </div>
 
-    <!-- Role checks -->
+    <!-- Role limits -->
     <div class="card">
-      <div class="section-title" style="font-size:16px">Roles</div>
+      <div class="sec-title">Roles</div>
       <div class="roles-grid">
         <div class="role-chip" id="chip-WK">
           <span class="role-chip-label">Wicketkeeper</span>
-          <span class="role-chip-count" id="count-WK">0</span>
-          <span class="role-chip-range">1–4 required</span>
+          <span class="role-chip-count" id="cnt-WK">0</span>
+          <span class="role-chip-range" id="range-WK">exactly 1</span>
         </div>
         <div class="role-chip" id="chip-BAT">
           <span class="role-chip-label">Batter</span>
-          <span class="role-chip-count" id="count-BAT">0</span>
-          <span class="role-chip-range">3–6 required</span>
+          <span class="role-chip-count" id="cnt-BAT">0</span>
+          <span class="role-chip-range" id="range-BAT">min 3</span>
         </div>
         <div class="role-chip" id="chip-AR">
           <span class="role-chip-label">All-Rounder</span>
-          <span class="role-chip-count" id="count-AR">0</span>
-          <span class="role-chip-range">1–4 required</span>
+          <span class="role-chip-count" id="cnt-AR">0</span>
+          <span class="role-chip-range" id="range-AR">min 2</span>
         </div>
         <div class="role-chip" id="chip-BWL">
           <span class="role-chip-label">Bowler</span>
-          <span class="role-chip-count" id="count-BWL">0</span>
-          <span class="role-chip-range">2–5 required</span>
+          <span class="role-chip-count" id="cnt-BWL">0</span>
+          <span class="role-chip-range" id="range-BWL">min 3</span>
         </div>
       </div>
     </div>
 
-    <!-- Selected squad -->
+    <!-- Selected XI -->
     <div class="card">
-      <div class="section-title" style="font-size:16px">Your XI</div>
-      <p class="captain-hint" style="margin-bottom:12px">
-        Click <span class="gold">C</span> for captain (×2 pts) · <span class="gn">VC</span> for vice-captain (×1.5 pts)
-      </p>
+      <div class="sec-title">Your XI</div>
+      <p class="cap-hint">Tap <span class="g">C</span> to set captain (×2 pts). Captain required to submit.</p>
       <ul class="squad-list" id="squadList">
-        <li class="squad-empty">No players selected yet</li>
+        <li class="squad-empty">No players selected yet.</li>
       </ul>
+      <div class="squad-tally" id="squadTally"></div>
     </div>
 
-    <!-- Submit -->
+    <!-- Message & submit -->
     <div id="msgBox"></div>
-    <button class="submit-btn" id="submitBtn" onclick="submitTeam()" disabled>
+    <button class="submit-btn" id="submitBtn" onclick="submitTeam()" disabled
+      aria-label="Submit your fantasy team">
       Submit Team
     </button>
-  </div>
-</div>
+
+  </aside>
+</div><!-- /main -->
 
 <script>
-// ── CONFIG ── Set this to your deployed Apps Script URL ─────
-const API_URL = "https://script.google.com/macros/s/AKfycbxQaOS-zzP-tcApqbrb7lRsgyJFpwWS8N9MK1LaPpuKErZ-wkSJ8D_ZBvocef2nVjvDCQ/exec";
-const BUDGET  = 100;
-const SQUAD   = 11;
-const ROLE_LIMITS = {
-  "Wicketkeeper": [1,4],
-  "Batter":       [3,6],
-  "All-Rounder":  [1,4],
-  "Bowler":       [2,5],
-};
-const ROLE_ABBR = {
-  "Wicketkeeper": "WK", "Batter": "BAT", "All-Rounder": "AR", "Bowler": "BWL"
-};
-// ────────────────────────────────────────────────────────────
+/* ═══════════════════════════════════════════════════════════════════
+   CONFIG — edit to match your deployment
+   ══════════════════════════════════════════════════════════════════ */
+const API_URL = "YOUR_APPS_SCRIPT_EXEC_URL"; // paste /exec URL here
 
-let allPlayers  = [];
-let selected    = new Set();      // player IDs
-let captainId   = null;
-let viceCaptainId = null;
+/* These must match CONFIG in Code.gs exactly */
+const BUDGET     = 100;
+const SQUAD_SIZE = 11;
+const MIN_PER_SQUAD = 2;
+
+/* Role rules: key must match values returned by the API (backend role strings) */
+const ROLE_LIMITS = {
+  "Wicketkeeper": { min: 1, max: 1,  abbr: "WK"  },
+  "Batter":       { min: 3, max: 99, abbr: "BAT" },
+  "All-Rounder":  { min: 2, max: 99, abbr: "AR"  },
+  "Bowler":       { min: 3, max: 99, abbr: "BWL" },
+};
+/* ═══════════════════════════════════════════════════════════════════ */
+
+let allPlayers   = [];
+let selected     = new Set();   // Set of player IDs
+let captainId    = null;
 let activeFilter = "All";
 
-// ── INIT ─────────────────────────────────────────────────────
-async function init() {
+/* ── INIT ────────────────────────────────────────────────────────── */
+(async function init() {
   await Promise.all([loadPlayers(), loadLeaderboard()]);
+  updateRoleRanges();
+})();
+
+/* ── API HELPER ──────────────────────────────────────────────────── */
+async function apiFetch(payload) {
+  const res = await fetch(API_URL, {
+    method:  "POST",
+    headers: { "Content-Type": "text/plain" }, // avoids CORS preflight
+    body:    JSON.stringify(payload),
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
 }
 
+/* ── LOAD PLAYERS ────────────────────────────────────────────────── */
 async function loadPlayers() {
   try {
-    const res  = await apiFetch({ action: "getPlayers" });
+    const res = await apiFetch({ action: "getPlayers" });
     if (res.success) {
       allPlayers = res.players;
       renderTable();
     } else {
-      document.getElementById("tableWrap").innerHTML =
-        `<p class="no-players">Could not load players: ${res.error || "unknown error"}</p>`;
+      showTableError("Could not load players: " + (res.error || "unknown error"));
     }
-  } catch(e) {
-    document.getElementById("tableWrap").innerHTML =
-      `<p class="no-players">API connection failed. Check the API_URL in index.html.</p>`;
+  } catch (e) {
+    showTableError("Could not reach the API. Check the API_URL in the &lt;script&gt; config.");
   }
 }
+function showTableError(msg) {
+  document.getElementById("tableWrap").innerHTML =
+    `<p class="tbl-empty">${msg}</p>`;
+}
 
+/* ── LOAD LEADERBOARD ────────────────────────────────────────────── */
 async function loadLeaderboard() {
   try {
     const res = await apiFetch({ action: "getLeaderboard" });
     renderLeaderboard(res.success ? res.leaderboard : []);
-  } catch(e) {
+  } catch (e) {
     renderLeaderboard([]);
   }
 }
+function renderLeaderboard(lb) {
+  const el = document.getElementById("lbWrap");
+  if (!lb || lb.length === 0) {
+    el.innerHTML = `<p class="lb-empty">No scores yet — check back after the first match!</p>`;
+    return;
+  }
+  const medals = ["g","s","b"];
+  el.innerHTML = lb.map((r, i) => `
+    <div class="lb-row">
+      <span class="lb-rank ${medals[i]||""}">${r.rank}</span>
+      <div class="lb-info">
+        <div class="lb-name">${escHtml(r.name)}</div>
+        <div class="lb-team">${escHtml(r.teamName)}</div>
+      </div>
+      <span class="lb-pts">${r.points} pts</span>
+    </div>`).join("");
+}
 
-// ── API CALL ─────────────────────────────────────────────────
-async function apiFetch(payload) {
-  const res = await fetch(API_URL, {
-    method: "POST",
-    headers: { "Content-Type": "text/plain" },  // text/plain avoids CORS preflight
-    body: JSON.stringify(payload),
+/* ── TABS ────────────────────────────────────────────────────────── */
+function switchTab(name, btn) {
+  document.querySelectorAll(".tab-btn").forEach(b => {
+    b.classList.remove("active"); b.setAttribute("aria-selected","false");
   });
-  return res.json();
+  document.querySelectorAll(".tab-pane").forEach(p => p.classList.remove("active"));
+  btn.classList.add("active"); btn.setAttribute("aria-selected","true");
+  document.getElementById("pane-" + name).classList.add("active");
 }
 
-// ── TABS ─────────────────────────────────────────────────────
-function switchTab(name) {
-  document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
-  document.querySelectorAll(".tab-content").forEach(t => t.classList.remove("active"));
-  document.getElementById("tab-" + name).classList.add("active");
-  event.target.classList.add("active");
-}
-
-// ── FILTER ───────────────────────────────────────────────────
+/* ── FILTER ──────────────────────────────────────────────────────── */
 function setFilter(role, btn) {
   activeFilter = role;
   document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
@@ -734,59 +657,67 @@ function setFilter(role, btn) {
   renderTable();
 }
 
-// ── RENDER PLAYER TABLE ───────────────────────────────────────
+/* ── RENDER TABLE ────────────────────────────────────────────────── */
 function renderTable() {
-  const query = document.getElementById("searchInput").value.toLowerCase();
+  const query    = (document.getElementById("searchBox").value || "").toLowerCase();
+  const spent    = getSpent();
+  const canAdd   = selected.size < SQUAD_SIZE;
+
   const filtered = allPlayers.filter(p => {
-    const roleOk = activeFilter === "All" || p.role === activeFilter;
-    const searchOk = p.name.toLowerCase().includes(query) || p.club.toLowerCase().includes(query);
-    return roleOk && searchOk;
+    const roleOk   = activeFilter === "All" || p.role === activeFilter;
+    const queryOk  = !query ||
+      p.name.toLowerCase().includes(query) ||
+      (p.squad || "").toLowerCase().includes(query);
+    return roleOk && queryOk;
   });
 
-  const spent = getSpent();
-  const canAddMore = selected.size < SQUAD;
-
   if (filtered.length === 0) {
-    document.getElementById("tableWrap").innerHTML = `<p class="no-players">No players match your search.</p>`;
+    document.getElementById("tableWrap").innerHTML =
+      `<p class="tbl-empty">No players match your search.</p>`;
     return;
   }
 
   const rows = filtered.map(p => {
-    const isSel = selected.has(p.id);
+    const isSel    = selected.has(p.id);
     const canAfford = (spent + p.price) <= BUDGET || isSel;
-    const disabled = (!isSel && (!canAddMore || !canAfford)) ? "disabled" : "";
-    const abbr = ROLE_ABBR[p.role] || p.role;
-    return `
-      <tr class="player-row ${isSel ? "selected" : ""} ${disabled}" onclick="togglePlayer('${p.id}')">
-        <td><span class="player-name">${p.name}</span>${p.club ? `<br><span style="font-size:11px;color:var(--muted)">${p.club}</span>` : ""}</td>
-        <td><span class="role-badge role-${abbr}">${abbr}</span></td>
-        <td class="player-price">£${p.price.toFixed(1)}</td>
-        <td><button class="add-btn ${isSel ? "selected" : ""}" tabindex="-1"></button></td>
-      </tr>`;
+    const dimmed   = !isSel && (!canAdd || !canAfford);
+    const abbr     = (ROLE_LIMITS[p.role] || {}).abbr || p.role;
+    const icon     = isSel ? "✓" : "+";
+    return `<tr class="prow ${isSel?"sel":""} ${dimmed?"dim":""}"
+        onclick="togglePlayer(${JSON.stringify(p.id)})"
+        tabindex="0"
+        onkeydown="if(event.key==='Enter'||event.key===' ')togglePlayer(${JSON.stringify(p.id)})"
+        role="row" aria-label="${p.name}, ${p.role}, £${p.price}m${isSel?' (selected)':''}">
+      <td>
+        <div class="p-name">${escHtml(p.name)}</div>
+        ${p.squad ? `<div class="p-squad">${escHtml(p.squad)}</div>` : ""}
+      </td>
+      <td><span class="role-badge r-${abbr}">${abbr}</span></td>
+      <td class="p-price">£${p.price.toFixed(1)}</td>
+      <td><button class="pick-btn ${isSel?"on":""}" tabindex="-1" aria-hidden="true"
+          onclick="event.stopPropagation();togglePlayer(${JSON.stringify(p.id)})">${icon}</button></td>
+    </tr>`;
   }).join("");
 
   document.getElementById("tableWrap").innerHTML = `
-    <table class="player-table">
-      <thead>
-        <tr>
-          <th>Player</th>
-          <th>Role</th>
-          <th>Price</th>
-          <th style="text-align:center">Pick</th>
-        </tr>
-      </thead>
+    <table class="player-table" role="table" aria-label="Player pool">
+      <thead><tr>
+        <th>Player</th>
+        <th>Role</th>
+        <th>Price</th>
+        <th class="center">Pick</th>
+      </tr></thead>
       <tbody>${rows}</tbody>
     </table>`;
 }
 
-// ── TOGGLE PLAYER ─────────────────────────────────────────────
+/* ── TOGGLE PLAYER ───────────────────────────────────────────────── */
 function togglePlayer(id) {
   if (selected.has(id)) {
     selected.delete(id);
-    if (captainId === id)    captainId = null;
-    if (viceCaptainId === id) viceCaptainId = null;
+    if (captainId === id) captainId = null;
   } else {
-    if (selected.size >= SQUAD) return;
+    if (selected.size >= SQUAD_SIZE) return;
     const p = allPlayers.find(x => x.id === id);
     if (!p) return;
     if (getSpent() + p.price > BUDGET) return;
@@ -795,39 +726,20 @@ function togglePlayer(id) {
   update();
 }
 
-// ── SET CAPTAIN / VICE-CAP ────────────────────────────────────
+/* ── CAPTAIN ─────────────────────────────────────────────────────── */
 function setCaptain(id, e) {
   e.stopPropagation();
-  if (captainId === id)      { captainId = null; }
-  else if (viceCaptainId === id) {
-    viceCaptainId = null;
-    captainId = id;
-  } else {
-    captainId = id;
-    if (viceCaptainId === id) viceCaptainId = null;
-  }
-  update();
-}
-function setViceCaptain(id, e) {
-  e.stopPropagation();
-  if (viceCaptainId === id)  { viceCaptainId = null; }
-  else if (captainId === id) {
-    captainId = null;
-    viceCaptainId = id;
-  } else {
-    viceCaptainId = id;
-    if (captainId === id) captainId = null;
-  }
+  captainId = (captainId === id) ? null : id;
   update();
 }
 
-// ── UPDATE ALL UI ─────────────────────────────────────────────
+/* ── UPDATE ALL UI ───────────────────────────────────────────────── */
 function update() {
   updateBudget();
   updateRoles();
   updateSquadList();
   renderTable();
-  updateSubmitBtn();
+  updateSubmit();
 }
 
 function getSpent() {
@@ -837,133 +749,191 @@ function getSpent() {
   }, 0);
 }
 
+/* Budget bar */
 function updateBudget() {
   const spent = getSpent();
+  const over  = spent > BUDGET;
   const pct   = Math.min((spent / BUDGET) * 100, 100);
-  const danger = spent > BUDGET;
-  document.getElementById("budgetDisplay").textContent = `£${spent.toFixed(1)} / £${BUDGET}`;
-  document.getElementById("budgetDisplay").className = "budget-display" + (danger ? " danger" : "");
+  document.getElementById("budgetFig").textContent = `£${spent.toFixed(1)} / £${BUDGET}m`;
+  document.getElementById("budgetFig").className   = "budget-figure" + (over ? " over" : "");
   document.getElementById("budgetBar").style.width = pct + "%";
-  document.getElementById("budgetBar").className = "budget-bar-fill" + (danger ? " danger" : "");
-  document.getElementById("countDisplay").textContent = selected.size;
+  document.getElementById("budgetBar").className   = "budget-bar-fill" + (over ? " over" : "");
+  document.getElementById("squadCount").textContent = selected.size;
 }
 
+/* Role chips */
 function updateRoles() {
-  const roleCounts = { Wicketkeeper:0, Batter:0, "All-Rounder":0, Bowler:0 };
+  const counts = {};
   selected.forEach(id => {
     const p = allPlayers.find(x => x.id === id);
-    if (p && roleCounts[p.role] !== undefined) roleCounts[p.role]++;
+    if (p) counts[p.role] = (counts[p.role] || 0) + 1;
   });
-  const abbrs = { Wicketkeeper:"WK", Batter:"BAT", "All-Rounder":"AR", Bowler:"BWL" };
-  Object.entries(roleCounts).forEach(([role, count]) => {
-    const [min, max] = ROLE_LIMITS[role];
-    const abbr = abbrs[role];
-    document.getElementById(`count-${abbr}`).textContent = count;
+  Object.entries(ROLE_LIMITS).forEach(([role, {min, max, abbr}]) => {
+    const n = counts[role] || 0;
+    document.getElementById(`cnt-${abbr}`).textContent = n;
     const chip = document.getElementById(`chip-${abbr}`);
-    chip.className = "role-chip";
-    if (count >= min && count <= max) chip.classList.add("ok");
-    else if (count > 0)              chip.classList.add("warn");
-    else                             chip.classList.add("error");
+    chip.className = "role-chip " + (n === 0 ? "" : n >= min && n <= max ? "ok" : "warn");
+    if (selected.size === SQUAD_SIZE && (n < min || n > max)) chip.className = "role-chip err";
+  });
+}
+function updateRoleRanges() {
+  /* Write human-readable range strings from config */
+  const labels = {
+    "WK":  "exactly 1",
+    "BAT": "min 3",
+    "AR":  "min 2",
+    "BWL": "min 3",
+  };
+  Object.entries(labels).forEach(([abbr, txt]) => {
+    const el = document.getElementById(`range-${abbr}`);
+    if (el) el.textContent = txt;
   });
 }
 
+/* Squad list with captain button */
 function updateSquadList() {
   const list = document.getElementById("squadList");
+  const tally = document.getElementById("squadTally");
+
   if (selected.size === 0) {
-    list.innerHTML = `<li class="squad-empty">No players selected yet</li>`;
+    list.innerHTML = `<li class="squad-empty">No players selected yet.</li>`;
+    tally.innerHTML = "";
     return;
   }
-  const items = [...selected].map(id => {
+
+  // Build squad-tally for min-per-squad rule
+  const squadCounts = {};
+  [...selected].forEach(id => {
+    const p = allPlayers.find(x => x.id === id);
+    if (p && p.squad) squadCounts[p.squad] = (squadCounts[p.squad] || 0) + 1;
+  });
+
+  list.innerHTML = [...selected].map(id => {
     const p = allPlayers.find(x => x.id === id);
     if (!p) return "";
-    const isCap  = captainId === id;
-    const isVice = viceCaptainId === id;
+    const isCap = captainId === id;
     return `<li class="squad-item">
-      <span class="squad-item-name">${p.name}</span>
-      <button class="squad-captain-btn ${isCap ? "is-captain" : ""}"
-        onclick="setCaptain('${id}', event)" title="Set as captain">C</button>
-      <button class="squad-captain-btn ${isVice ? "is-vice-cap" : ""}"
-        onclick="setViceCaptain('${id}', event)" title="Set as vice-captain">VC</button>
-      <button class="squad-remove" onclick="togglePlayer('${id}')" title="Remove">×</button>
+      <div style="flex:1">
+        <span class="squad-item-name">${escHtml(p.name)}</span>
+        ${p.squad ? `<span class="squad-item-squad">${escHtml(p.squad)}</span>` : ""}
+      </div>
+      <button class="cap-btn ${isCap ? "is-cap" : ""}"
+        onclick="setCaptain(${JSON.stringify(id)}, event)"
+        aria-label="${isCap ? "Remove captain" : "Set as captain"}"
+        title="Captain (×2 pts)">C</button>
+      <button class="remove-btn"
+        onclick="togglePlayer(${JSON.stringify(id)})"
+        aria-label="Remove ${p.name}">×</button>
     </li>`;
   }).join("");
-  list.innerHTML = items;
+
+  // Tally display
+  const tallyParts = Object.entries(squadCounts).map(([sq, c]) =>
+    `<span class="${c >= MIN_PER_SQUAD ? "ok" : "bad"}">${escHtml(sq)}: ${c}</span>`
+  );
+  tally.innerHTML = tallyParts.length
+    ? `<div style="margin-top:4px">Per squad: ${tallyParts.join(" · ")}</div>`
+    : "";
 }
 
-function updateSubmitBtn() {
-  const ready = selected.size === SQUAD && captainId && viceCaptainId && getSpent() <= BUDGET;
-  document.getElementById("submitBtn").disabled = !ready;
+/* Enable/disable submit */
+function updateSubmit() {
+  const btn   = document.getElementById("submitBtn");
+  if (btn.classList.contains("done")) return;
+
+  const spent = getSpent();
+
+  // Role validation
+  const counts = {};
+  [...selected].forEach(id => {
+    const p = allPlayers.find(x => x.id === id);
+    if (p) counts[p.role] = (counts[p.role] || 0) + 1;
+  });
+  const rolesOk = Object.entries(ROLE_LIMITS).every(([role, {min, max}]) => {
+    const n = counts[role] || 0;
+    return n >= min && n <= max;
+  });
+
+  // Squad min
+  const squadCounts = {};
+  [...selected].forEach(id => {
+    const p = allPlayers.find(x => x.id === id);
+    if (p && p.squad) squadCounts[p.squad] = (squadCounts[p.squad] || 0) + 1;
+  });
+  const squadOk = Object.values(squadCounts).every(c => c >= MIN_PER_SQUAD);
+
+  const ready = selected.size === SQUAD_SIZE
+    && captainId
+    && spent <= BUDGET
+    && rolesOk
+    && squadOk;
+
+  btn.disabled = !ready;
 }
 
-// ── SUBMIT ───────────────────────────────────────────────────
+/* ── SUBMIT ──────────────────────────────────────────────────────── */
 async function submitTeam() {
   const name  = document.getElementById("managerName").value.trim();
   const email = document.getElementById("managerEmail").value.trim();
   const tname = document.getElementById("teamName").value.trim();
   const msgBox = document.getElementById("msgBox");
 
-  if (!name || !email) {
-    msgBox.innerHTML = `<div class="msg msg-error">Please fill in your name and email address.</div>`;
+  // Client-side field validation
+  let fieldErr = false;
+  if (!name) {
+    document.getElementById("managerName").classList.add("err"); fieldErr = true;
+  } else { document.getElementById("managerName").classList.remove("err"); }
+  if (!email || !email.includes("@")) {
+    document.getElementById("managerEmail").classList.add("err"); fieldErr = true;
+  } else { document.getElementById("managerEmail").classList.remove("err"); }
+  if (fieldErr) {
+    msgBox.innerHTML = `<div class="msg msg-err">Please fill in your name and a valid email address.</div>`;
     return;
   }
 
   const btn = document.getElementById("submitBtn");
   btn.disabled = true;
-  btn.innerHTML = `<span class="spinner"></span> Submitting…`;
+  btn.innerHTML = `<span class="spinner"></span>Submitting…`;
   msgBox.innerHTML = "";
 
   try {
     const res = await apiFetch({
       action:         "submit",
       submitterName:  name,
-      submitterEmail: email,
+      submitterEmail: email.toLowerCase(),
       teamName:       tname || name + "'s XI",
       playerIds:      [...selected],
       captainId,
-      viceCaptainId,
     });
 
     if (res.success) {
-      msgBox.innerHTML = `<div class="msg msg-success">
-        ✓ <strong>${res.message}</strong><br>
-        Your team has been submitted. Good luck!
+      msgBox.innerHTML = `<div class="msg msg-ok">
+        ✓ <strong>Team submitted!</strong><br>
+        ${escHtml(res.message)}
       </div>`;
       btn.textContent = "Team Submitted ✓";
+      btn.classList.add("done");
     } else {
       const errs = res.errors
-        ? `<ul>${res.errors.map(e => `<li>${e}</li>`).join("")}</ul>`
-        : res.error || "Unknown error.";
-      msgBox.innerHTML = `<div class="msg msg-error"><strong>Submission failed:</strong>${errs}</div>`;
+        ? `<ul>${res.errors.map(e => `<li>${escHtml(e)}</li>`).join("")}</ul>`
+        : escHtml(res.error || "Unknown server error.");
+      msgBox.innerHTML = `<div class="msg msg-err"><strong>Submission failed:</strong>${errs}</div>`;
       btn.disabled = false;
       btn.textContent = "Submit Team";
     }
-  } catch(e) {
-    msgBox.innerHTML = `<div class="msg msg-error">Network error. Please try again.</div>`;
+  } catch (e) {
+    msgBox.innerHTML = `<div class="msg msg-err">Network error — please try again.</div>`;
     btn.disabled = false;
     btn.textContent = "Submit Team";
   }
 }
 
-// ── LEADERBOARD ───────────────────────────────────────────────
-function renderLeaderboard(lb) {
-  const el = document.getElementById("lbContent");
-  if (!lb || lb.length === 0) {
-    el.innerHTML = `<p class="lb-empty">No scores yet — check back after the first match!</p>`;
-    return;
-  }
-  const medals = ["gold","silver","bronze"];
-  el.innerHTML = lb.map((r,i) => `
-    <div class="lb-row">
-      <span class="lb-rank ${medals[i]||""}">${r.rank}</span>
-      <div>
-        <div class="lb-name">${r.name}</div>
-        <div class="lb-team">${r.teamName}</div>
-      </div>
-      <span class="lb-pts">${r.points} pts</span>
-    </div>`).join("");
+/* ── UTIL ────────────────────────────────────────────────────────── */
+function escHtml(str) {
+  if (typeof str !== "string") return String(str ?? "");
+  return str.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+            .replace(/"/g,"&quot;").replace(/'/g,"&#39;");
 }
-
-init();
 </script>
 </body>
 </html>
