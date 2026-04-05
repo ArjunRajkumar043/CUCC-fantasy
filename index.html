@@ -9,485 +9,280 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root {
-  --cream:    #F5F0E8;
-  --cream-2:  #EDE8DF;
-  --dark:     #1A1A14;
-  --green:    #2D5016;
-  --green-l:  #3D6B20;
-  --green-hl: rgba(45,80,22,0.08);
-  --lime:     #8BBF3C;
-  --gold:     #C9A84C;
-  --gold-bg:  rgba(201,168,76,0.12);
-  --red:      #B83227;
-  --red-bg:   rgba(184,50,39,0.09);
-  --ink:      #2C2C20;
-  --muted:    #6B6B54;
-  --faint:    #A8A892;
-  --rule:     rgba(45,80,22,0.12);
-  --surface:  #FFFFFF;
-  --sans:     'DM Sans', system-ui, sans-serif;
-  --serif:    'Playfair Display', Georgia, serif;
-  --mono:     'DM Mono', 'Courier New', monospace;
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 14px;
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.07);
+  --cream:   #F5F0E8;
+  --cream-2: #EDE8DF;
+  --dark:    #1A1A14;
+  --green:   #2D5016;
+  --green-l: #3D6B20;
+  --green-hl:rgba(45,80,22,0.08);
+  --lime:    #8BBF3C;
+  --gold:    #C9A84C;
+  --gold-bg: rgba(201,168,76,0.12);
+  --red:     #B83227;
+  --red-bg:  rgba(184,50,39,0.09);
+  --ink:     #2C2C20;
+  --muted:   #6B6B54;
+  --faint:   #A8A892;
+  --rule:    rgba(45,80,22,0.12);
+  --surface: #FFFFFF;
+  --sans:    'DM Sans', system-ui, sans-serif;
+  --serif:   'Playfair Display', Georgia, serif;
+  --mono:    'DM Mono', 'Courier New', monospace;
+  --rsm: 6px; --rmd: 10px; --rlg: 14px;
   --t: 160ms cubic-bezier(0.16,1,0.3,1);
 }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--cream);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.6;min-height:100dvh;-webkit-font-smoothing:antialiased;}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background-image:repeating-linear-gradient(0deg,transparent,transparent 39px,rgba(45,80,22,0.035) 39px,rgba(45,80,22,0.035) 40px);}
+button{cursor:pointer;font-family:inherit;}
+input{font-family:inherit;}
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
-body {
-  background: var(--cream);
-  color: var(--ink);
-  font-family: var(--sans);
-  font-size: 15px;
-  line-height: 1.6;
-  min-height: 100dvh;
-  -webkit-font-smoothing: antialiased;
-}
-body::before {
-  content: '';
-  position: fixed; inset: 0; pointer-events: none; z-index: 0;
-  background-image: repeating-linear-gradient(
-    0deg, transparent, transparent 39px,
-    rgba(45,80,22,0.035) 39px, rgba(45,80,22,0.035) 40px
-  );
-}
-img, svg { display: block; }
-button { cursor: pointer; font-family: inherit; }
-input  { font-family: inherit; }
+header{background:var(--green);padding:24px 40px 22px;position:relative;overflow:hidden;}
+header::after{content:'🏏';position:absolute;right:40px;top:50%;transform:translateY(-50%) rotate(-20deg);font-size:68px;opacity:.1;pointer-events:none;}
+.hdr{display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap;}
+.logo{color:var(--lime);flex-shrink:0;}
+.eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(245,240,232,0.5);margin-bottom:2px;}
+header h1{font-family:var(--serif);font-size:clamp(22px,3.5vw,34px);font-weight:900;line-height:1.05;color:var(--cream);}
+header h1 span{color:var(--lime);}
 
-/* ── HEADER ── */
-header {
-  background: var(--green);
-  padding: 24px 40px 22px;
-  position: relative; overflow: hidden;
-}
-header::after {
-  content: '🏏';
-  position: absolute; right: 40px; top: 50%;
-  transform: translateY(-50%) rotate(-20deg);
-  font-size: 68px; opacity: 0.1; pointer-events: none;
-}
-.header-inner { display: flex; align-items: flex-end; gap: 14px; flex-wrap: wrap; }
-.logo-mark { color: var(--lime); flex-shrink: 0; }
-.header-eyebrow {
-  font-family: var(--mono); font-size: 10px; letter-spacing: 2px;
-  text-transform: uppercase; color: rgba(245,240,232,0.5); margin-bottom: 2px;
-}
-header h1 {
-  font-family: var(--serif);
-  font-size: clamp(22px, 3.5vw, 34px);
-  font-weight: 900; line-height: 1.05;
-  color: var(--cream); letter-spacing: -0.3px;
-}
-header h1 span { color: var(--lime); }
+.bstrip{background:var(--dark);padding:10px 40px;display:flex;align-items:center;gap:20px;flex-wrap:wrap;position:sticky;top:0;z-index:200;box-shadow:0 2px 12px rgba(0,0,0,.2);}
+.blabel{font-family:var(--mono);font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:rgba(245,240,232,.45);white-space:nowrap;}
+.bfig{font-family:var(--mono);font-size:18px;font-weight:500;color:var(--lime);white-space:nowrap;transition:color var(--t);}
+.bfig.over{color:#E8564A;}
+.btrack{flex:1;min-width:100px;height:5px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden;}
+.bfill{height:100%;background:var(--lime);border-radius:3px;transition:width .35s ease,background .35s ease;}
+.bfill.over{background:#E8564A;}
+.scount{font-family:var(--mono);font-size:12px;color:rgba(245,240,232,.6);white-space:nowrap;}
+.scount strong{color:var(--cream);}
 
-/* ── BUDGET BAR ── */
-.budget-strip {
-  background: var(--dark);
-  padding: 10px 40px;
-  display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
-  position: sticky; top: 0; z-index: 200;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.2);
-}
-.budget-label {
-  font-family: var(--mono); font-size: 10px;
-  letter-spacing: 1.2px; text-transform: uppercase;
-  color: rgba(245,240,232,0.45); white-space: nowrap;
-}
-.budget-figure {
-  font-family: var(--mono); font-size: 18px; font-weight: 500;
-  color: var(--lime); white-space: nowrap; transition: color var(--t);
-}
-.budget-figure.over { color: #E8564A; }
-.budget-bar-track {
-  flex: 1; min-width: 100px; height: 5px;
-  background: rgba(255,255,255,0.08); border-radius: 3px; overflow: hidden;
-}
-.budget-bar-fill {
-  height: 100%; background: var(--lime); border-radius: 3px;
-  transition: width 0.35s ease, background 0.35s ease;
-}
-.budget-bar-fill.over { background: #E8564A; }
-.squad-count {
-  font-family: var(--mono); font-size: 12px;
-  color: rgba(245,240,232,0.6); white-space: nowrap;
-}
-.squad-count strong { color: var(--cream); }
+.main{position:relative;z-index:1;max-width:1120px;margin:0 auto;padding:28px 24px 80px;display:grid;grid-template-columns:1fr 310px;gap:28px;align-items:start;}
+@media(max-width:840px){.main{grid-template-columns:1fr;}header{padding:18px 20px;}header::after{display:none;}.bstrip{padding:10px 16px;gap:12px;}.sidebar{position:static;}}
+@media(max-width:420px){.btrack{display:none;}}
 
-/* ── MAIN LAYOUT ── */
-.main {
-  position: relative; z-index: 1;
-  max-width: 1120px; margin: 0 auto;
-  padding: 28px 24px 80px;
-  display: grid;
-  grid-template-columns: 1fr 310px;
-  gap: 28px; align-items: start;
-}
-@media (max-width: 840px) {
-  .main { grid-template-columns: 1fr; }
-  header { padding: 18px 20px; }
-  header::after { display: none; }
-  .budget-strip { padding: 10px 16px; gap: 12px; }
-  .sidebar { position: static; }
-}
+.tabs{display:flex;border-bottom:2px solid var(--rule);}
+.tbtn{font-family:var(--mono);font-size:11px;letter-spacing:1px;text-transform:uppercase;padding:10px 20px;border:none;background:transparent;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;transition:color var(--t),border-color var(--t);}
+.tbtn:hover{color:var(--green);}
+.tbtn.on{color:var(--green);border-bottom-color:var(--green);}
+.pane{display:none;padding-top:22px;}
+.pane.on{display:block;}
 
-/* ── TABS ── */
-.tab-bar { display: flex; border-bottom: 2px solid var(--rule); }
-.tab-btn {
-  font-family: var(--mono); font-size: 11px;
-  letter-spacing: 1px; text-transform: uppercase;
-  padding: 10px 20px; border: none; background: transparent;
-  color: var(--muted); border-bottom: 2px solid transparent;
-  margin-bottom: -2px; transition: color var(--t), border-color var(--t);
-}
-.tab-btn:hover { color: var(--green); }
-.tab-btn.active { color: var(--green); border-bottom-color: var(--green); }
-.tab-pane { display: none; padding-top: 22px; }
-.tab-pane.active { display: block; }
+.fbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+.fbtn{font-family:var(--mono);font-size:10px;letter-spacing:1px;text-transform:uppercase;padding:5px 14px;border:1.5px solid var(--rule);border-radius:20px;background:transparent;color:var(--muted);transition:all var(--t);}
+.fbtn:hover,.fbtn.on{background:var(--green);border-color:var(--green);color:var(--cream);}
+.sbox{flex:1;min-width:140px;font-size:13px;padding:6px 14px;border:1.5px solid var(--rule);border-radius:20px;background:white;color:var(--ink);outline:none;transition:border-color var(--t);}
+.sbox:focus{border-color:var(--green);}
 
-/* ── FILTERS ── */
-.filter-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
-.filter-btn {
-  font-family: var(--mono); font-size: 10px;
-  letter-spacing: 1px; text-transform: uppercase;
-  padding: 5px 14px;
-  border: 1.5px solid var(--rule); border-radius: 20px;
-  background: transparent; color: var(--muted);
-  transition: all var(--t);
-}
-.filter-btn:hover, .filter-btn.active {
-  background: var(--green); border-color: var(--green); color: var(--cream);
-}
-.search-box {
-  flex: 1; min-width: 140px; font-size: 13px;
-  padding: 6px 14px; border: 1.5px solid var(--rule); border-radius: 20px;
-  background: white; color: var(--ink); outline: none;
-  transition: border-color var(--t);
-}
-.search-box:focus { border-color: var(--green); }
+.ptable{width:100%;border-collapse:collapse;}
+.ptable thead th{font-family:var(--mono);font-size:9px;letter-spacing:1.3px;text-transform:uppercase;color:var(--faint);padding:7px 10px;border-bottom:1.5px solid var(--rule);text-align:left;}
+.ptable thead th.c{text-align:center;}
+.ptable tbody tr{border-bottom:1px solid var(--rule);}
+.ptable tbody tr.sel{background:rgba(45,80,22,0.07);}
+.ptable tbody tr.dim{opacity:.38;}
+.ptable td{padding:9px 10px;vertical-align:middle;}
+.pname{font-weight:500;color:var(--ink);font-size:14px;}
+.psquad{font-size:11px;color:var(--muted);margin-top:1px;}
+.rbadge{display:inline-block;font-family:var(--mono);font-size:9px;letter-spacing:.8px;text-transform:uppercase;padding:2px 7px;border-radius:10px;font-weight:500;}
+.r-WK {background:#FFF0D0;color:#7A5200;}
+.r-BAT{background:#D4EAFF;color:#003F7A;}
+.r-AR {background:#EAD4FF;color:#4A007A;}
+.r-BWL{background:#D4FFE8;color:#005A28;}
+.pprice{font-family:var(--mono);font-size:13px;color:var(--green);font-weight:500;}
+.pcell{text-align:center;width:50px;}
 
-/* ── PLAYER TABLE ── */
-.player-table { width: 100%; border-collapse: collapse; }
-.player-table thead th {
-  font-family: var(--mono); font-size: 9px;
-  letter-spacing: 1.3px; text-transform: uppercase;
-  color: var(--faint); padding: 7px 10px;
-  border-bottom: 1.5px solid var(--rule); text-align: left;
+/* Pick button — deliberately simple, no complex selectors */
+.pbtn{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:28px;height:28px;border-radius:50%;
+  border:1.5px solid var(--green);
+  background:transparent;color:var(--green);
+  font-size:18px;font-weight:700;line-height:1;padding:0;
+  cursor:pointer;
+  transition:background var(--t),color var(--t);
 }
-.player-table thead th.center { text-align: center; }
+.pbtn:hover{background:var(--green);color:var(--cream);}
+.pbtn.picked{background:var(--green);color:var(--cream);}
+.pbtn.cant{opacity:.3;cursor:not-allowed;border-color:var(--faint);color:var(--faint);}
 
-/* Row is purely visual — the button does the work */
-.prow { border-bottom: 1px solid var(--rule); }
-.prow.dim td { opacity: 0.38; }
-.prow.sel { background: rgba(45,80,22,0.07); }
-.prow td  { padding: 9px 10px; vertical-align: middle; }
+.empty{text-align:center;padding:40px 20px;color:var(--muted);font-style:italic;font-size:14px;}
 
-.p-name  { font-weight: 500; color: var(--ink); font-size: 14px; }
-.p-squad { font-size: 11px; color: var(--muted); margin-top: 1px; }
+.lbrow{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--rule);}
+.lbrow:last-child{border-bottom:none;}
+.lbrank{font-family:var(--serif);font-size:19px;font-weight:700;color:var(--faint);width:30px;text-align:center;flex-shrink:0;}
+.lbrank.g{color:var(--gold);}.lbrank.s{color:#9E9E9E;}.lbrank.b{color:#A06040;}
+.lbinfo{flex:1;}.lbname{font-weight:500;font-size:14px;}.lbteam{font-size:12px;color:var(--muted);}
+.lbpts{font-family:var(--mono);font-size:15px;font-weight:500;color:var(--green);}
+.lbempty{color:var(--muted);font-style:italic;text-align:center;padding:36px 0;font-size:14px;}
 
-.role-badge {
-  display: inline-block; font-family: var(--mono);
-  font-size: 9px; letter-spacing: 0.8px; text-transform: uppercase;
-  padding: 2px 7px; border-radius: 10px; font-weight: 500;
-}
-.r-WK  { background: #FFF0D0; color: #7A5200; }
-.r-BAT { background: #D4EAFF; color: #003F7A; }
-.r-AR  { background: #EAD4FF; color: #4A007A; }
-.r-BWL { background: #D4FFE8; color: #005A28; }
+.sidebar{position:sticky;top:54px;}
+.card{background:var(--surface);border:1px solid var(--rule);border-radius:var(--rlg);padding:20px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.07);}
+.stitle{font-family:var(--serif);font-size:17px;font-weight:700;color:var(--green);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.stitle::after{content:'';flex:1;height:1px;background:var(--rule);}
+.fgroup{margin-bottom:12px;}.fgroup:last-child{margin-bottom:0;}
+.flabel{display:block;font-family:var(--mono);font-size:9px;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
+.finput{width:100%;font-size:14px;padding:8px 11px;border:1.5px solid var(--rule);border-radius:var(--rsm);color:var(--ink);background:var(--cream);outline:none;transition:border-color var(--t);}
+.finput:focus{border-color:var(--green);}.finput.err{border-color:var(--red);}
 
-.p-price { font-family: var(--mono); font-size: 13px; color: var(--green); font-weight: 500; }
+.rgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.rchip{border:1.5px solid var(--rule);border-radius:var(--rmd);padding:9px 10px;text-align:center;transition:border-color var(--t),background var(--t);}
+.rchip-label{font-family:var(--mono);font-size:8px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:block;}
+.rchip-count{font-family:var(--serif);font-size:22px;font-weight:700;color:var(--green);display:block;line-height:1.15;}
+.rchip-range{font-family:var(--mono);font-size:8px;color:var(--faint);}
+.rchip.ok  {border-color:rgba(45,80,22,.35);}
+.rchip.warn{border-color:var(--gold);background:var(--gold-bg);}
+.rchip.err {border-color:var(--red);background:var(--red-bg);}
 
-/* The pick button is the clickable element — full cell hit area */
-.pick-cell { text-align: center; width: 48px; }
-.pick-btn {
-  width: 28px; height: 28px; border-radius: 50%;
-  border: 1.5px solid var(--green); background: transparent;
-  color: var(--green); display: inline-flex; align-items: center;
-  justify-content: center; font-size: 17px; font-weight: 700;
-  transition: all var(--t); line-height: 1; padding: 0;
-}
-.pick-btn:hover:not(:disabled)  { background: var(--green); color: var(--cream); }
-.pick-btn.on     { background: var(--green); color: var(--cream); }
-.pick-btn:disabled { opacity: 0.3; cursor: not-allowed; border-color: var(--faint); color: var(--faint); }
+.sqlist{list-style:none;}
+.sqitem{display:flex;align-items:center;gap:6px;padding:7px 0;border-bottom:1px solid var(--rule);font-size:13px;}
+.sqitem:last-child{border-bottom:none;}
+.sqname{font-weight:500;line-height:1.2;flex:1;}
+.sqsquad{font-size:10px;color:var(--muted);display:block;}
+.capbtn{font-family:var(--mono);font-size:9px;letter-spacing:.5px;padding:2px 7px;border-radius:4px;border:1px solid var(--rule);background:transparent;color:var(--muted);transition:all var(--t);white-space:nowrap;}
+.capbtn:hover{border-color:var(--gold);color:var(--gold);}
+.capbtn.iscap{background:var(--gold);border-color:var(--gold);color:var(--dark);font-weight:500;}
+.rmbtn{color:var(--faint);font-size:18px;line-height:1;padding:1px 3px;border:none;background:none;transition:color var(--t);flex-shrink:0;}
+.rmbtn:hover{color:var(--red);}
+.sqempty{color:var(--muted);font-style:italic;font-size:13px;padding:6px 0;}
+.caphint{font-size:11px;color:var(--muted);margin-bottom:12px;line-height:1.45;}
+.caphint .g{color:var(--gold);font-weight:600;}
+.tally{margin-top:10px;font-size:11px;color:var(--muted);line-height:1.7;}
+.tally .ok{color:var(--green);font-weight:500;}.tally .bad{color:var(--red);font-weight:500;}
 
-.tbl-empty {
-  text-align: center; padding: 40px 20px;
-  color: var(--muted); font-style: italic; font-size: 14px;
-}
-
-/* ── LEADERBOARD ── */
-.lb-row {
-  display: flex; align-items: center; gap: 12px;
-  padding: 10px 0; border-bottom: 1px solid var(--rule);
-}
-.lb-row:last-child { border-bottom: none; }
-.lb-rank { font-family: var(--serif); font-size: 19px; font-weight: 700; color: var(--faint); width: 30px; text-align: center; flex-shrink: 0; }
-.lb-rank.g { color: var(--gold); }
-.lb-rank.s { color: #9E9E9E; }
-.lb-rank.b { color: #A06040; }
-.lb-info { flex: 1; }
-.lb-name { font-weight: 500; font-size: 14px; }
-.lb-team { font-size: 12px; color: var(--muted); }
-.lb-pts  { font-family: var(--mono); font-size: 15px; font-weight: 500; color: var(--green); }
-.lb-empty { color: var(--muted); font-style: italic; text-align: center; padding: 36px 0; font-size: 14px; }
-
-/* ── SIDEBAR ── */
-.sidebar { position: sticky; top: 54px; }
-.card {
-  background: var(--surface); border: 1px solid var(--rule);
-  border-radius: var(--radius-lg); padding: 20px; margin-bottom: 16px;
-  box-shadow: var(--shadow-sm);
-}
-.sec-title {
-  font-family: var(--serif); font-size: 17px; font-weight: 700;
-  color: var(--green); margin-bottom: 14px;
-  display: flex; align-items: center; gap: 8px;
-}
-.sec-title::after { content: ''; flex: 1; height: 1px; background: var(--rule); }
-
-.form-group { margin-bottom: 12px; }
-.form-group:last-child { margin-bottom: 0; }
-.form-label {
-  display: block; font-family: var(--mono); font-size: 9px;
-  letter-spacing: 1.2px; text-transform: uppercase;
-  color: var(--muted); margin-bottom: 4px;
-}
-.form-input {
-  width: 100%; font-size: 14px;
-  padding: 8px 11px; border: 1.5px solid var(--rule);
-  border-radius: var(--radius-sm); color: var(--ink);
-  background: var(--cream); outline: none; transition: border-color var(--t);
-}
-.form-input:focus { border-color: var(--green); }
-.form-input.err   { border-color: var(--red); }
-
-.roles-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.role-chip {
-  border: 1.5px solid var(--rule); border-radius: var(--radius-md);
-  padding: 9px 10px; text-align: center;
-  transition: border-color var(--t), background var(--t);
-}
-.role-chip-label { font-family: var(--mono); font-size: 8px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); display: block; }
-.role-chip-count { font-family: var(--serif); font-size: 22px; font-weight: 700; color: var(--green); display: block; line-height: 1.15; }
-.role-chip-range { font-family: var(--mono); font-size: 8px; color: var(--faint); }
-.role-chip.ok    { border-color: rgba(45,80,22,0.35); }
-.role-chip.warn  { border-color: var(--gold); background: var(--gold-bg); }
-.role-chip.err   { border-color: var(--red);  background: var(--red-bg); }
-
-.squad-list { list-style: none; }
-.squad-item {
-  display: flex; align-items: center; gap: 6px;
-  padding: 7px 0; border-bottom: 1px solid var(--rule); font-size: 13px;
-}
-.squad-item:last-child { border-bottom: none; }
-.squad-item-name  { font-weight: 500; line-height: 1.2; }
-.squad-item-squad { font-size: 10px; color: var(--muted); display: block; }
-
-.cap-btn {
-  font-family: var(--mono); font-size: 9px; letter-spacing: 0.5px;
-  padding: 2px 7px; border-radius: 4px;
-  border: 1px solid var(--rule); background: transparent;
-  color: var(--muted); transition: all var(--t); white-space: nowrap;
-}
-.cap-btn:hover  { border-color: var(--gold); color: var(--gold); }
-.cap-btn.is-cap { background: var(--gold); border-color: var(--gold); color: var(--dark); font-weight: 500; }
-
-.remove-btn {
-  color: var(--faint); font-size: 18px; line-height: 1; padding: 1px 3px;
-  border: none; background: none; transition: color var(--t); flex-shrink: 0;
-}
-.remove-btn:hover { color: var(--red); }
-
-.squad-empty { color: var(--muted); font-style: italic; font-size: 13px; padding: 6px 0; }
-.cap-hint { font-size: 11px; color: var(--muted); margin-bottom: 12px; line-height: 1.45; }
-.cap-hint .g { color: var(--gold); font-weight: 600; }
-
-.squad-tally { margin-top: 10px; font-size: 11px; color: var(--muted); line-height: 1.7; }
-.squad-tally .ok  { color: var(--green); font-weight: 500; }
-.squad-tally .bad { color: var(--red);   font-weight: 500; }
-
-.submit-btn {
-  width: 100%;
-  font-family: var(--serif); font-size: 17px; font-weight: 700;
-  padding: 14px; border: none; border-radius: var(--radius-md);
-  background: var(--green); color: var(--cream);
-  transition: background var(--t), transform var(--t), box-shadow var(--t);
-}
-.submit-btn:hover:not(:disabled) {
-  background: var(--green-l);
-  transform: translateY(-1px);
-  box-shadow: 0 5px 18px rgba(45,80,22,0.28);
-}
-.submit-btn:disabled { opacity: 0.45; cursor: not-allowed; }
-.submit-btn.done { background: #437a22; cursor: default; }
-
-.spinner {
-  display: inline-block; width: 14px; height: 14px;
-  border: 2px solid rgba(245,240,232,0.3);
-  border-top-color: var(--cream); border-radius: 50%;
-  animation: spin 0.65s linear infinite;
-  vertical-align: middle; margin-right: 6px;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-
-.msg {
-  border-radius: var(--radius-md); padding: 12px 14px;
-  font-size: 13px; margin-bottom: 14px; line-height: 1.5;
-}
-.msg-err { background: var(--red-bg); border: 1px solid rgba(184,50,39,0.25); color: #7B1A10; }
-.msg-ok  { background: var(--green-hl); border: 1px solid rgba(45,80,22,0.3); color: var(--green); }
-.msg ul  { margin: 6px 0 0 16px; }
-.msg li  { margin-bottom: 3px; }
-
-.skeleton {
-  background: linear-gradient(90deg, var(--cream-2) 25%, #e8e3da 50%, var(--cream-2) 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.4s ease-in-out infinite;
-  border-radius: var(--radius-sm); margin-bottom: 10px;
-}
-@keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
-
-@media (max-width: 420px) {
-  .budget-bar-track { display: none; }
-}
+.subbtn{width:100%;font-family:var(--serif);font-size:17px;font-weight:700;padding:14px;border:none;border-radius:var(--rmd);background:var(--green);color:var(--cream);transition:background var(--t),transform var(--t),box-shadow var(--t);}
+.subbtn:hover:not(:disabled){background:var(--green-l);transform:translateY(-1px);box-shadow:0 5px 18px rgba(45,80,22,.28);}
+.subbtn:disabled{opacity:.45;cursor:not-allowed;}
+.subbtn.done{background:#437a22;cursor:default;}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(245,240,232,.3);border-top-color:var(--cream);border-radius:50%;animation:sp .65s linear infinite;vertical-align:middle;margin-right:6px;}
+@keyframes sp{to{transform:rotate(360deg);}}
+.msg{border-radius:var(--rmd);padding:12px 14px;font-size:13px;margin-bottom:14px;line-height:1.5;}
+.msg-err{background:var(--red-bg);border:1px solid rgba(184,50,39,.25);color:#7B1A10;}
+.msg-ok{background:var(--green-hl);border:1px solid rgba(45,80,22,.3);color:var(--green);}
+.msg ul{margin:6px 0 0 16px;}.msg li{margin-bottom:3px;}
+.skel{background:linear-gradient(90deg,var(--cream-2) 25%,#e8e3da 50%,var(--cream-2) 75%);background-size:200% 100%;animation:sh 1.4s ease-in-out infinite;border-radius:var(--rsm);margin-bottom:10px;}
+@keyframes sh{0%{background-position:-200% 0}100%{background-position:200% 0}}
 </style>
 </head>
 <body>
 
 <header>
-  <div class="header-inner">
-    <svg class="logo-mark" width="36" height="44" viewBox="0 0 36 44" fill="none" aria-hidden="true">
-      <rect x="7"  y="8" width="4" height="30" rx="2" fill="currentColor" opacity="0.9"/>
+  <div class="hdr">
+    <svg class="logo" width="36" height="44" viewBox="0 0 36 44" fill="none" aria-hidden="true">
+      <rect x="7"  y="8" width="4" height="30" rx="2" fill="currentColor" opacity=".9"/>
       <rect x="16" y="8" width="4" height="30" rx="2" fill="currentColor"/>
-      <rect x="25" y="8" width="4" height="30" rx="2" fill="currentColor" opacity="0.9"/>
-      <rect x="5"  y="6" width="10" height="3" rx="1.5" fill="currentColor" opacity="0.7"/>
-      <rect x="21" y="6" width="10" height="3" rx="1.5" fill="currentColor" opacity="0.7"/>
+      <rect x="25" y="8" width="4" height="30" rx="2" fill="currentColor" opacity=".9"/>
+      <rect x="5"  y="6" width="10" height="3" rx="1.5" fill="currentColor" opacity=".7"/>
+      <rect x="21" y="6" width="10" height="3" rx="1.5" fill="currentColor" opacity=".7"/>
     </svg>
     <div>
-      <div class="header-eyebrow">Season 2025</div>
+      <div class="eyebrow">Season 2025</div>
       <h1>Fantasy <span>Cricket XI</span></h1>
     </div>
   </div>
 </header>
 
-<div class="budget-strip" role="status" aria-live="polite">
-  <span class="budget-label">Budget</span>
-  <span class="budget-figure" id="budgetFig">£0.0 / £100m</span>
-  <div class="budget-bar-track" aria-hidden="true">
-    <div class="budget-bar-fill" id="budgetBar" style="width:0%"></div>
-  </div>
-  <span class="squad-count"><strong id="squadCount">0</strong> / 11 players</span>
+<div class="bstrip" role="status" aria-live="polite">
+  <span class="blabel">Budget</span>
+  <span class="bfig" id="bfig">£0.0 / £100m</span>
+  <div class="btrack" aria-hidden="true"><div class="bfill" id="bfill" style="width:0%"></div></div>
+  <span class="scount"><strong id="scnt">0</strong> / 11 players</span>
 </div>
 
 <div class="main">
-  <!-- LEFT -->
   <div class="left-col">
-    <div class="tab-bar">
-      <button class="tab-btn active" onclick="switchTab('pick',this)">Pick Players</button>
-      <button class="tab-btn"        onclick="switchTab('lb',this)">Leaderboard</button>
+    <div class="tabs">
+      <button class="tbtn on"  onclick="switchTab('pick',this)">Pick Players</button>
+      <button class="tbtn"     onclick="switchTab('lb',this)">Leaderboard</button>
     </div>
 
-    <div class="tab-pane active" id="pane-pick">
-      <div class="filter-bar" style="margin-top:4px">
-        <input class="search-box" id="searchBox" type="search"
-          placeholder="Search player or squad…" aria-label="Search players"
-          oninput="renderTable()">
-        <button class="filter-btn active" onclick="setFilter('All',this)">All</button>
-        <button class="filter-btn" onclick="setFilter('Wicketkeeper',this)">WK</button>
-        <button class="filter-btn" onclick="setFilter('Batter',this)">BAT</button>
-        <button class="filter-btn" onclick="setFilter('All-Rounder',this)">AR</button>
-        <button class="filter-btn" onclick="setFilter('Bowler',this)">BWL</button>
+    <div class="pane on" id="pane-pick">
+      <div class="fbar" style="margin-top:4px">
+        <input class="sbox" id="searchBox" type="search" placeholder="Search player or squad…" oninput="renderTable()">
+        <button class="fbtn on"  onclick="setFilter('All',this)">All</button>
+        <button class="fbtn"     onclick="setFilter('Wicketkeeper',this)">WK</button>
+        <button class="fbtn"     onclick="setFilter('Batter',this)">BAT</button>
+        <button class="fbtn"     onclick="setFilter('All-Rounder',this)">AR</button>
+        <button class="fbtn"     onclick="setFilter('Bowler',this)">BWL</button>
       </div>
       <div id="tableWrap">
         <div style="padding:8px 0">
-          <div class="skeleton" style="width:100%;height:14px"></div>
-          <div class="skeleton" style="width:90%;height:14px"></div>
-          <div class="skeleton" style="width:95%;height:14px"></div>
-          <div class="skeleton" style="width:80%;height:14px"></div>
-          <div class="skeleton" style="width:92%;height:14px"></div>
+          <div class="skel" style="width:100%;height:14px"></div>
+          <div class="skel" style="width:90%;height:14px"></div>
+          <div class="skel" style="width:95%;height:14px"></div>
+          <div class="skel" style="width:80%;height:14px"></div>
+          <div class="skel" style="width:88%;height:14px"></div>
         </div>
       </div>
     </div>
 
-    <div class="tab-pane" id="pane-lb">
-      <div id="lbWrap"><p class="lb-empty">Loading leaderboard…</p></div>
+    <div class="pane" id="pane-lb">
+      <div id="lbWrap"><p class="lbempty">Loading leaderboard…</p></div>
     </div>
   </div>
 
-  <!-- RIGHT -->
   <aside class="sidebar">
     <div class="card">
-      <div class="sec-title">Your Details</div>
-      <div class="form-group">
-        <label class="form-label" for="managerName">Your name</label>
-        <input class="form-input" id="managerName" type="text" placeholder="e.g. James Smith" autocomplete="name">
+      <div class="stitle">Your Details</div>
+      <div class="fgroup">
+        <label class="flabel" for="managerName">Your name</label>
+        <input class="finput" id="managerName" type="text" placeholder="e.g. James Smith" autocomplete="name">
       </div>
-      <div class="form-group">
-        <label class="form-label" for="managerEmail">Email address</label>
-        <input class="form-input" id="managerEmail" type="email" placeholder="you@example.com" autocomplete="email">
+      <div class="fgroup">
+        <label class="flabel" for="managerEmail">Email address</label>
+        <input class="finput" id="managerEmail" type="email" placeholder="you@example.com" autocomplete="email">
       </div>
-      <div class="form-group">
-        <label class="form-label" for="teamName">Team name <span style="color:var(--faint)">(optional)</span></label>
-        <input class="form-input" id="teamName" type="text" placeholder="e.g. Wembley Wildcats XI">
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="sec-title">Roles</div>
-      <div class="roles-grid">
-        <div class="role-chip" id="chip-WK">
-          <span class="role-chip-label">Wicketkeeper</span>
-          <span class="role-chip-count" id="cnt-WK">0</span>
-          <span class="role-chip-range">exactly 1</span>
-        </div>
-        <div class="role-chip" id="chip-BAT">
-          <span class="role-chip-label">Batter</span>
-          <span class="role-chip-count" id="cnt-BAT">0</span>
-          <span class="role-chip-range">min 3</span>
-        </div>
-        <div class="role-chip" id="chip-AR">
-          <span class="role-chip-label">All-Rounder</span>
-          <span class="role-chip-count" id="cnt-AR">0</span>
-          <span class="role-chip-range">min 2</span>
-        </div>
-        <div class="role-chip" id="chip-BWL">
-          <span class="role-chip-label">Bowler</span>
-          <span class="role-chip-count" id="cnt-BWL">0</span>
-          <span class="role-chip-range">min 3</span>
-        </div>
+      <div class="fgroup">
+        <label class="flabel" for="teamName">Team name <span style="color:var(--faint)">(optional)</span></label>
+        <input class="finput" id="teamName" type="text" placeholder="e.g. Wembley Wildcats XI">
       </div>
     </div>
 
     <div class="card">
-      <div class="sec-title">Your XI</div>
-      <p class="cap-hint">Tap <span class="g">C</span> to set your captain (×2 pts). Required to submit.</p>
-      <ul class="squad-list" id="squadList">
-        <li class="squad-empty">No players selected yet.</li>
-      </ul>
-      <div class="squad-tally" id="squadTally"></div>
+      <div class="stitle">Roles</div>
+      <div class="rgrid">
+        <div class="rchip" id="chip-WK">
+          <span class="rchip-label">Wicketkeeper</span>
+          <span class="rchip-count" id="cnt-WK">0</span>
+          <span class="rchip-range">exactly 1</span>
+        </div>
+        <div class="rchip" id="chip-BAT">
+          <span class="rchip-label">Batter</span>
+          <span class="rchip-count" id="cnt-BAT">0</span>
+          <span class="rchip-range">min 3</span>
+        </div>
+        <div class="rchip" id="chip-AR">
+          <span class="rchip-label">All-Rounder</span>
+          <span class="rchip-count" id="cnt-AR">0</span>
+          <span class="rchip-range">min 2</span>
+        </div>
+        <div class="rchip" id="chip-BWL">
+          <span class="rchip-label">Bowler</span>
+          <span class="rchip-count" id="cnt-BWL">0</span>
+          <span class="rchip-range">min 3</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="stitle">Your XI</div>
+      <p class="caphint">Tap <span class="g">C</span> to set your captain (×2 pts). Required to submit.</p>
+      <ul class="sqlist" id="squadList"><li class="sqempty">No players selected yet.</li></ul>
+      <div class="tally" id="tally"></div>
     </div>
 
     <div id="msgBox"></div>
-    <button class="submit-btn" id="submitBtn" onclick="submitTeam()" disabled>Submit Team</button>
+    <button class="subbtn" id="submitBtn" onclick="submitTeam()" disabled>Submit Team</button>
   </aside>
 </div>
 
 <script>
 // ═══════════════════════════════════════════════════
-//  CONFIG — paste your /exec URL here
+//  CONFIG
 // ═══════════════════════════════════════════════════
-const API_URL = "https://script.google.com/macros/s/AKfycbzxYJ9F7mApt-m0NxdP3PQWk9xiTFS3HlHCyscDWAq73AMnl4IetzKidLdPHWpm3QRAkA/exec";
-
+const API_URL      = "YOUR_APPS_SCRIPT_EXEC_URL";
 const BUDGET       = 100;
 const SQUAD_SIZE   = 11;
 const MIN_PER_SQUAD = 2;
-
-// Keys must exactly match the normalised role values returned by the API
-// (the backend normalises WK→Wicketkeeper etc. before sending)
-const ROLE_LIMITS = {
+const ROLE_LIMITS  = {
   "Wicketkeeper": { min:1, max:1,  abbr:"WK"  },
   "Batter":       { min:3, max:99, abbr:"BAT" },
   "All-Rounder":  { min:2, max:99, abbr:"AR"  },
@@ -495,8 +290,8 @@ const ROLE_LIMITS = {
 };
 // ═══════════════════════════════════════════════════
 
-let allPlayers   = [];
-let selected     = new Set();
+let players      = [];   // full player list from API
+let selected     = [];   // array of player IDs (ordered)
 let captainId    = null;
 let activeFilter = "All";
 
@@ -507,158 +302,186 @@ let activeFilter = "All";
 
 // ── API ───────────────────────────────────────────
 async function apiFetch(payload) {
-  const res = await fetch(API_URL, {
+  const r = await fetch(API_URL, {
     method:  "POST",
-    headers: { "Content-Type": "text/plain" },
+    headers: {"Content-Type":"text/plain"},
     body:    JSON.stringify(payload),
   });
-  if (!res.ok) throw new Error("HTTP " + res.status);
-  return res.json();
+  if (!r.ok) throw new Error("HTTP " + r.status);
+  return r.json();
 }
 
-// ── LOAD PLAYERS ──────────────────────────────────
+// ── PLAYERS ───────────────────────────────────────
 async function loadPlayers() {
   try {
-    const res = await apiFetch({ action: "getPlayers" });
-    if (res.success) {
-      allPlayers = res.players;
-      renderTable();
-    } else {
-      document.getElementById("tableWrap").innerHTML =
-        `<p class="tbl-empty">Could not load players: ${esc(res.error || "unknown error")}</p>`;
-    }
+    const res = await apiFetch({ action:"getPlayers" });
+    if (res.success) { players = res.players; renderTable(); }
+    else setTableMsg("Could not load players: " + (res.error||"unknown"));
   } catch(e) {
-    document.getElementById("tableWrap").innerHTML =
-      `<p class="tbl-empty">Could not reach the API — check the API_URL at the top of the script.</p>`;
+    setTableMsg("Cannot reach API — check the API_URL in the script config.");
   }
 }
-
-// ── LOAD LEADERBOARD ──────────────────────────────
-async function loadLeaderboard() {
-  try {
-    const res = await apiFetch({ action: "getLeaderboard" });
-    renderLeaderboard(res.success ? res.leaderboard : []);
-  } catch(e) { renderLeaderboard([]); }
+function setTableMsg(msg) {
+  document.getElementById("tableWrap").innerHTML =
+    '<p class="empty">' + esc(msg) + "</p>";
 }
 
-function renderLeaderboard(lb) {
+// ── LEADERBOARD ───────────────────────────────────
+async function loadLeaderboard() {
+  try {
+    const res = await apiFetch({ action:"getLeaderboard" });
+    renderLB(res.success ? res.leaderboard : []);
+  } catch(e) { renderLB([]); }
+}
+function renderLB(lb) {
   const el = document.getElementById("lbWrap");
-  if (!lb || lb.length === 0) {
-    el.innerHTML = `<p class="lb-empty">No scores yet — check back after the first match!</p>`;
+  if (!lb || !lb.length) {
+    el.innerHTML = '<p class="lbempty">No scores yet — check back after the first match!</p>';
     return;
   }
   const medals = ["g","s","b"];
-  el.innerHTML = lb.map((r,i) => `
-    <div class="lb-row">
-      <span class="lb-rank ${medals[i]||""}">${r.rank}</span>
-      <div class="lb-info">
-        <div class="lb-name">${esc(r.name)}</div>
-        <div class="lb-team">${esc(r.teamName)}</div>
-      </div>
-      <span class="lb-pts">${r.points} pts</span>
-    </div>`).join("");
+  el.innerHTML = lb.map(function(r,i) {
+    return '<div class="lbrow">'
+      + '<span class="lbrank ' + (medals[i]||"") + '">' + r.rank + "</span>"
+      + '<div class="lbinfo"><div class="lbname">' + esc(r.name) + "</div>"
+      + '<div class="lbteam">' + esc(r.teamName) + "</div></div>"
+      + '<span class="lbpts">' + r.points + " pts</span></div>";
+  }).join("");
 }
 
 // ── TABS ──────────────────────────────────────────
 function switchTab(name, btn) {
-  document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
-  document.querySelectorAll(".tab-pane").forEach(p => p.classList.remove("active"));
-  btn.classList.add("active");
-  document.getElementById("pane-" + name).classList.add("active");
+  document.querySelectorAll(".tbtn").forEach(function(b){ b.classList.remove("on"); });
+  document.querySelectorAll(".pane").forEach(function(p){ p.classList.remove("on"); });
+  btn.classList.add("on");
+  document.getElementById("pane-" + name).classList.add("on");
 }
 
 // ── FILTER ────────────────────────────────────────
 function setFilter(role, btn) {
   activeFilter = role;
-  document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
-  btn.classList.add("active");
+  document.querySelectorAll(".fbtn").forEach(function(b){ b.classList.remove("on"); });
+  btn.classList.add("on");
   renderTable();
 }
 
 // ── RENDER TABLE ──────────────────────────────────
-// FIX 1: rows are NOT clickable — only the pick button fires togglePlayer.
-// This prevents the double-fire (row click + button click) that caused
-// immediate de-selection and made it look like the button did nothing.
+// Uses DOM construction (no innerHTML for interactive elements)
+// so there is zero chance of attribute-escaping bugs breaking onclick.
 function renderTable() {
-  const query  = (document.getElementById("searchBox").value || "").toLowerCase();
-  const spent  = getSpent();
-  const canAdd = selected.size < SQUAD_SIZE;
+  var query  = (document.getElementById("searchBox").value || "").toLowerCase();
+  var spent  = getSpent();
+  var canAdd = selected.length < SQUAD_SIZE;
 
-  const filtered = allPlayers.filter(p => {
-    // FIX 2: filter comparison uses the normalised role name that the
-    // backend now guarantees (e.g. "Wicketkeeper", not "WK").
-    const roleOk  = activeFilter === "All" || p.role === activeFilter;
-    const queryOk = !query ||
-      p.name.toLowerCase().includes(query) ||
-      (p.squad || "").toLowerCase().includes(query);
+  var filtered = players.filter(function(p) {
+    var roleOk  = activeFilter === "All" || p.role === activeFilter;
+    var queryOk = !query
+      || p.name.toLowerCase().indexOf(query) !== -1
+      || (p.squad||"").toLowerCase().indexOf(query) !== -1;
     return roleOk && queryOk;
   });
 
-  if (filtered.length === 0) {
-    document.getElementById("tableWrap").innerHTML =
-      `<p class="tbl-empty">No players match your search.</p>`;
+  var wrap = document.getElementById("tableWrap");
+  if (!filtered.length) {
+    wrap.innerHTML = '<p class="empty">No players match your search.</p>';
     return;
   }
 
-  const rows = filtered.map(p => {
-    const isSel     = selected.has(p.id);
-    const canAfford = isSel || (spent + p.price) <= BUDGET;
-    // Disabled = can't add AND not already selected
-    const disabled  = !isSel && (!canAdd || !canAfford);
-    const abbr      = (ROLE_LIMITS[p.role] || {}).abbr || p.role;
+  // Build table using DOM API — 100% safe, no escaping issues
+  var table = document.createElement("table");
+  table.className = "ptable";
 
-    return `<tr class="prow ${isSel ? "sel" : ""} ${disabled ? "dim" : ""}">
-      <td>
-        <div class="p-name">${esc(p.name)}</div>
-        ${p.squad ? `<div class="p-squad">${esc(p.squad)}</div>` : ""}
-      </td>
-      <td><span class="role-badge r-${abbr}">${abbr}</span></td>
-      <td class="p-price">£${p.price.toFixed(1)}</td>
-      <td class="pick-cell">
-        <button
-          class="pick-btn ${isSel ? "on" : ""}"
-          ${disabled ? "disabled" : ""}
-          onclick="togglePlayer(${JSON.stringify(p.id)})"
-          aria-label="${isSel ? "Remove" : "Add"} ${esc(p.name)}"
-          title="${isSel ? "Remove from XI" : disabled ? "Cannot add (full or over budget)" : "Add to XI"}"
-        >${isSel ? "✓" : "+"}</button>
-      </td>
-    </tr>`;
-  }).join("");
+  var thead = table.createTHead();
+  var hrow  = thead.insertRow();
+  ["Player","Role","Price","Pick"].forEach(function(txt, i) {
+    var th = document.createElement("th");
+    th.textContent = txt;
+    if (i === 3) th.className = "c";
+    hrow.appendChild(th);
+  });
 
-  document.getElementById("tableWrap").innerHTML = `
-    <table class="player-table">
-      <thead><tr>
-        <th>Player</th><th>Role</th><th>Price</th>
-        <th class="center">Pick</th>
-      </tr></thead>
-      <tbody>${rows}</tbody>
-    </table>`;
+  var tbody = table.createTBody();
+
+  filtered.forEach(function(p) {
+    var isSel     = selected.indexOf(p.id) !== -1;
+    var canAfford = isSel || (spent + p.price) <= BUDGET;
+    var cant      = !isSel && (!canAdd || !canAfford);
+    var abbr      = (ROLE_LIMITS[p.role] || {}).abbr || p.role;
+
+    var tr = tbody.insertRow();
+    if (isSel) tr.classList.add("sel");
+    if (cant)  tr.classList.add("dim");
+
+    // Player name + squad
+    var td1 = tr.insertCell();
+    var nameDiv = document.createElement("div");
+    nameDiv.className   = "pname";
+    nameDiv.textContent = p.name;
+    td1.appendChild(nameDiv);
+    if (p.squad) {
+      var sqDiv = document.createElement("div");
+      sqDiv.className   = "psquad";
+      sqDiv.textContent = p.squad;
+      td1.appendChild(sqDiv);
+    }
+
+    // Role badge
+    var td2   = tr.insertCell();
+    var badge = document.createElement("span");
+    badge.className   = "rbadge r-" + abbr;
+    badge.textContent = abbr;
+    td2.appendChild(badge);
+
+    // Price
+    var td3 = tr.insertCell();
+    td3.className   = "pprice";
+    td3.textContent = "£" + p.price.toFixed(1);
+
+    // Pick button — built purely in JS, no innerHTML, no string escaping
+    var td4 = tr.insertCell();
+    td4.className = "pcell";
+    var btn = document.createElement("button");
+    btn.type      = "button";
+    btn.className = "pbtn" + (isSel ? " picked" : "") + (cant ? " cant" : "");
+    btn.textContent = isSel ? "✓" : "+";
+    btn.title       = isSel ? "Remove from XI" : cant ? "Can't add" : "Add to XI";
+    // Capture p.id in closure — no string interpolation risk
+    (function(pid) {
+      btn.addEventListener("click", function(e) {
+        e.stopPropagation();
+        togglePlayer(pid);
+      });
+    }(p.id));
+    td4.appendChild(btn);
+  });
+
+  wrap.innerHTML = "";
+  wrap.appendChild(table);
 }
 
-// ── TOGGLE PLAYER ─────────────────────────────────
+// ── TOGGLE ────────────────────────────────────────
 function togglePlayer(id) {
-  if (selected.has(id)) {
-    selected.delete(id);
+  var idx = selected.indexOf(id);
+  if (idx !== -1) {
+    selected.splice(idx, 1);
     if (captainId === id) captainId = null;
   } else {
-    if (selected.size >= SQUAD_SIZE) return;
-    const p = allPlayers.find(x => x.id === id);
+    if (selected.length >= SQUAD_SIZE) return;
+    var p = getPlayer(id);
     if (!p) return;
     if (getSpent() + p.price > BUDGET) return;
-    selected.add(id);
+    selected.push(id);
   }
   update();
 }
 
 // ── CAPTAIN ───────────────────────────────────────
-function setCaptain(id, e) {
-  e.stopPropagation();
+function setCaptain(id) {
   captainId = (captainId === id) ? null : id;
   update();
 }
 
-// ── UPDATE ALL UI ─────────────────────────────────
+// ── UPDATE ────────────────────────────────────────
 function update() {
   updateBudget();
   updateRoles();
@@ -667,166 +490,196 @@ function update() {
   updateSubmit();
 }
 
+function getPlayer(id) {
+  for (var i = 0; i < players.length; i++) {
+    if (players[i].id === id) return players[i];
+  }
+  return null;
+}
 function getSpent() {
-  return [...selected].reduce((sum, id) => {
-    const p = allPlayers.find(x => x.id === id);
-    return sum + (p ? p.price : 0);
-  }, 0);
+  var t = 0;
+  selected.forEach(function(id) { var p = getPlayer(id); if (p) t += p.price; });
+  return t;
 }
 
 function updateBudget() {
-  const spent = getSpent();
-  const over  = spent > BUDGET;
-  document.getElementById("budgetFig").textContent = `£${spent.toFixed(1)} / £${BUDGET}m`;
-  document.getElementById("budgetFig").className   = "budget-figure" + (over ? " over" : "");
-  document.getElementById("budgetBar").style.width = Math.min((spent/BUDGET)*100,100) + "%";
-  document.getElementById("budgetBar").className   = "budget-bar-fill" + (over ? " over" : "");
-  document.getElementById("squadCount").textContent = selected.size;
+  var spent = getSpent();
+  var over  = spent > BUDGET;
+  var pct   = Math.min((spent/BUDGET)*100, 100);
+  document.getElementById("bfig").textContent = "£" + spent.toFixed(1) + " / £" + BUDGET + "m";
+  document.getElementById("bfig").className   = "bfig" + (over ? " over" : "");
+  document.getElementById("bfill").style.width = pct + "%";
+  document.getElementById("bfill").className   = "bfill" + (over ? " over" : "");
+  document.getElementById("scnt").textContent  = selected.length;
 }
 
 function updateRoles() {
-  const counts = {};
-  selected.forEach(id => {
-    const p = allPlayers.find(x => x.id === id);
-    if (p) counts[p.role] = (counts[p.role] || 0) + 1;
+  var counts = {};
+  selected.forEach(function(id) {
+    var p = getPlayer(id);
+    if (p) counts[p.role] = (counts[p.role]||0) + 1;
   });
-  Object.entries(ROLE_LIMITS).forEach(([role, {min, max, abbr}]) => {
-    const n = counts[role] || 0;
-    document.getElementById(`cnt-${abbr}`).textContent = n;
-    const chip = document.getElementById(`chip-${abbr}`);
-    const full = selected.size === SQUAD_SIZE;
-    chip.className = "role-chip " +
-      (n === 0 ? "" : (n >= min && n <= max) ? "ok" : (full ? "err" : "warn"));
+  Object.keys(ROLE_LIMITS).forEach(function(role) {
+    var cfg  = ROLE_LIMITS[role];
+    var n    = counts[role] || 0;
+    var full = selected.length === SQUAD_SIZE;
+    document.getElementById("cnt-" + cfg.abbr).textContent = n;
+    var chip = document.getElementById("chip-" + cfg.abbr);
+    var cls  = "rchip";
+    if (n > 0) {
+      if (n >= cfg.min && n <= cfg.max) cls += " ok";
+      else cls += full ? " err" : " warn";
+    }
+    chip.className = cls;
   });
 }
 
 function updateSquadList() {
-  const list  = document.getElementById("squadList");
-  const tally = document.getElementById("squadTally");
+  var list  = document.getElementById("squadList");
+  var tally = document.getElementById("tally");
 
-  if (selected.size === 0) {
-    list.innerHTML  = `<li class="squad-empty">No players selected yet.</li>`;
+  if (!selected.length) {
+    list.innerHTML  = '<li class="sqempty">No players selected yet.</li>';
     tally.innerHTML = "";
     return;
   }
 
-  list.innerHTML = [...selected].map(id => {
-    const p = allPlayers.find(x => x.id === id);
-    if (!p) return "";
-    const isCap = captainId === id;
-    return `<li class="squad-item">
-      <div style="flex:1">
-        <span class="squad-item-name">${esc(p.name)}</span>
-        ${p.squad ? `<span class="squad-item-squad">${esc(p.squad)}</span>` : ""}
-      </div>
-      <button class="cap-btn ${isCap ? "is-cap" : ""}"
-        onclick="setCaptain(${JSON.stringify(id)}, event)"
-        title="Captain (×2 pts)">C</button>
-      <button class="remove-btn"
-        onclick="togglePlayer(${JSON.stringify(id)})"
-        title="Remove ${esc(p.name)}">×</button>
-    </li>`;
-  }).join("");
+  // Build list with DOM API to avoid onclick-in-string issues
+  list.innerHTML = "";
+  selected.forEach(function(id) {
+    var p = getPlayer(id);
+    if (!p) return;
+    var isCap = captainId === id;
+
+    var li = document.createElement("li");
+    li.className = "sqitem";
+
+    var info = document.createElement("div");
+    info.style.flex = "1";
+    var nm = document.createElement("span");
+    nm.className   = "sqname";
+    nm.textContent = p.name;
+    info.appendChild(nm);
+    if (p.squad) {
+      var sq = document.createElement("span");
+      sq.className   = "sqsquad";
+      sq.textContent = p.squad;
+      info.appendChild(sq);
+    }
+    li.appendChild(info);
+
+    var capBtn = document.createElement("button");
+    capBtn.type      = "button";
+    capBtn.className = "capbtn" + (isCap ? " iscap" : "");
+    capBtn.textContent = "C";
+    capBtn.title     = isCap ? "Remove captain" : "Set as captain (×2 pts)";
+    (function(pid) {
+      capBtn.addEventListener("click", function() { setCaptain(pid); });
+    }(id));
+    li.appendChild(capBtn);
+
+    var rmBtn = document.createElement("button");
+    rmBtn.type      = "button";
+    rmBtn.className = "rmbtn";
+    rmBtn.textContent = "×";
+    rmBtn.title     = "Remove " + p.name;
+    (function(pid) {
+      rmBtn.addEventListener("click", function() { togglePlayer(pid); });
+    }(id));
+    li.appendChild(rmBtn);
+
+    list.appendChild(li);
+  });
 
   // Per-squad tally
-  const squadCounts = {};
-  [...selected].forEach(id => {
-    const p = allPlayers.find(x => x.id === id);
-    if (p && p.squad) squadCounts[p.squad] = (squadCounts[p.squad] || 0) + 1;
+  var squadCounts = {};
+  selected.forEach(function(id) {
+    var p = getPlayer(id);
+    if (p && p.squad) squadCounts[p.squad] = (squadCounts[p.squad]||0) + 1;
   });
-  const parts = Object.entries(squadCounts).map(([sq, c]) =>
-    `<span class="${c >= MIN_PER_SQUAD ? "ok" : "bad"}">${esc(sq)}: ${c}</span>`
-  );
-  tally.innerHTML = parts.length
-    ? "Per squad: " + parts.join(" · ")
-    : "";
+  var parts = Object.keys(squadCounts).map(function(sq) {
+    var c = squadCounts[sq];
+    return '<span class="' + (c >= MIN_PER_SQUAD ? "ok" : "bad") + '">'
+      + esc(sq) + ": " + c + "</span>";
+  });
+  tally.innerHTML = parts.length ? "Per squad: " + parts.join(" · ") : "";
 }
 
 function updateSubmit() {
-  const btn = document.getElementById("submitBtn");
+  var btn = document.getElementById("submitBtn");
   if (btn.classList.contains("done")) return;
-
-  const counts = {};
-  [...selected].forEach(id => {
-    const p = allPlayers.find(x => x.id === id);
-    if (p) counts[p.role] = (counts[p.role] || 0) + 1;
+  var counts = {};
+  selected.forEach(function(id) {
+    var p = getPlayer(id); if (p) counts[p.role] = (counts[p.role]||0)+1;
   });
-  const rolesOk = Object.entries(ROLE_LIMITS).every(([role, {min, max}]) => {
-    const n = counts[role] || 0; return n >= min && n <= max;
+  var rolesOk = Object.keys(ROLE_LIMITS).every(function(role) {
+    var n = counts[role]||0; return n >= ROLE_LIMITS[role].min && n <= ROLE_LIMITS[role].max;
   });
-  const squadCounts = {};
-  [...selected].forEach(id => {
-    const p = allPlayers.find(x => x.id === id);
-    if (p && p.squad) squadCounts[p.squad] = (squadCounts[p.squad] || 0) + 1;
+  var sc = {};
+  selected.forEach(function(id) {
+    var p = getPlayer(id); if (p && p.squad) sc[p.squad] = (sc[p.squad]||0)+1;
   });
-  const squadOk = Object.values(squadCounts).every(c => c >= MIN_PER_SQUAD);
-
+  var squadOk = Object.keys(sc).every(function(s){ return sc[s] >= MIN_PER_SQUAD; });
   btn.disabled = !(
-    selected.size === SQUAD_SIZE &&
-    captainId &&
-    getSpent() <= BUDGET &&
-    rolesOk &&
-    squadOk
+    selected.length === SQUAD_SIZE && captainId &&
+    getSpent() <= BUDGET && rolesOk && squadOk
   );
 }
 
 // ── SUBMIT ────────────────────────────────────────
 async function submitTeam() {
-  const name   = document.getElementById("managerName").value.trim();
-  const email  = document.getElementById("managerEmail").value.trim();
-  const tname  = document.getElementById("teamName").value.trim();
-  const msgBox = document.getElementById("msgBox");
+  var name   = document.getElementById("managerName").value.trim();
+  var email  = document.getElementById("managerEmail").value.trim();
+  var tname  = document.getElementById("teamName").value.trim();
+  var msgBox = document.getElementById("msgBox");
 
-  let fieldErr = false;
-  ["managerName","managerEmail"].forEach(id => {
-    document.getElementById(id).classList.remove("err");
-  });
+  document.getElementById("managerName").classList.remove("err");
+  document.getElementById("managerEmail").classList.remove("err");
+  var fieldErr = false;
   if (!name)  { document.getElementById("managerName").classList.add("err");  fieldErr = true; }
-  if (!email || !email.includes("@")) {
+  if (!email || email.indexOf("@") === -1) {
     document.getElementById("managerEmail").classList.add("err"); fieldErr = true;
   }
   if (fieldErr) {
-    msgBox.innerHTML = `<div class="msg msg-err">Please fill in your name and a valid email address.</div>`;
+    msgBox.innerHTML = '<div class="msg msg-err">Please fill in your name and a valid email address.</div>';
     return;
   }
 
-  const btn = document.getElementById("submitBtn");
+  var btn = document.getElementById("submitBtn");
   btn.disabled = true;
-  btn.innerHTML = `<span class="spinner"></span>Submitting…`;
+  btn.innerHTML = '<span class="spin"></span>Submitting…';
   msgBox.innerHTML = "";
 
   try {
-    const res = await apiFetch({
+    var res = await apiFetch({
       action:         "submit",
       submitterName:  name,
       submitterEmail: email.toLowerCase(),
       teamName:       tname || name + "'s XI",
-      playerIds:      [...selected],
-      captainId,
+      playerIds:      selected.slice(),
+      captainId:      captainId,
     });
-
     if (res.success) {
-      msgBox.innerHTML = `<div class="msg msg-ok">✓ <strong>Team submitted!</strong><br>${esc(res.message)}</div>`;
+      msgBox.innerHTML = '<div class="msg msg-ok">✓ <strong>Team submitted!</strong><br>' + esc(res.message) + "</div>";
       btn.textContent = "Team Submitted ✓";
       btn.classList.add("done");
     } else {
-      const errs = res.errors
-        ? `<ul>${res.errors.map(e => `<li>${esc(e)}</li>`).join("")}</ul>`
+      var errs = res.errors
+        ? "<ul>" + res.errors.map(function(e){ return "<li>" + esc(e) + "</li>"; }).join("") + "</ul>"
         : esc(res.error || "Unknown server error.");
-      msgBox.innerHTML = `<div class="msg msg-err"><strong>Submission failed:</strong>${errs}</div>`;
+      msgBox.innerHTML = '<div class="msg msg-err"><strong>Submission failed:</strong>' + errs + "</div>";
       btn.disabled = false;
       btn.textContent = "Submit Team";
     }
   } catch(e) {
-    msgBox.innerHTML = `<div class="msg msg-err">Network error — please try again.</div>`;
+    msgBox.innerHTML = '<div class="msg msg-err">Network error — please try again.</div>';
     btn.disabled = false;
     btn.textContent = "Submit Team";
   }
 }
 
-// ── UTIL ──────────────────────────────────────────
 function esc(s) {
-  return String(s ?? "")
+  return String(s == null ? "" : s)
     .replace(/&/g,"&amp;").replace(/</g,"&lt;")
     .replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
 }
