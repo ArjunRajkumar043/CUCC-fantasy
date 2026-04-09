@@ -90,7 +90,6 @@ header h1 span{color:var(--lime);}
 .pprice{font-family:var(--mono);font-size:13px;color:var(--green);font-weight:500;}
 .pcell{text-align:center;width:50px;}
 
-/* Pick button — deliberately simple, no complex selectors */
 .pbtn{
   display:inline-flex;align-items:center;justify-content:center;
   width:28px;height:28px;border-radius:50%;
@@ -160,6 +159,26 @@ header h1 span{color:var(--lime);}
 .msg ul{margin:6px 0 0 16px;}.msg li{margin-bottom:3px;}
 .skel{background:linear-gradient(90deg,var(--cream-2) 25%,#e8e3da 50%,var(--cream-2) 75%);background-size:200% 100%;animation:sh 1.4s ease-in-out infinite;border-radius:var(--rsm);margin-bottom:10px;}
 @keyframes sh{0%{background-position:-200% 0}100%{background-position:200% 0}}
+
+/* ── MY TEAM LOOKUP ── */
+.myteam-lookup{padding-top:4px;}
+.lookup-hint{font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.5;}
+.lookup-row{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;}
+.lookup-input{flex:1;min-width:180px;}
+.lookup-btn{font-family:var(--mono);font-size:11px;letter-spacing:1px;text-transform:uppercase;padding:9px 20px;border:none;border-radius:var(--rsm);background:var(--green);color:var(--cream);cursor:pointer;transition:background var(--t);}
+.lookup-btn:hover{background:var(--green-l);}
+.team-card{background:var(--surface);border:1px solid var(--rule);border-radius:var(--rlg);padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.07);}
+.team-card-header{margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--rule);}
+.team-card-name{font-family:var(--serif);font-size:20px;font-weight:700;color:var(--green);}
+.team-card-meta{font-size:12px;color:var(--muted);margin-top:2px;font-family:var(--mono);}
+.team-player-list{list-style:none;}
+.team-player-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--rule);font-size:14px;}
+.team-player-item:last-child{border-bottom:none;}
+.team-player-name{flex:1;font-weight:500;}
+.cap-badge{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.5px;padding:2px 7px;border-radius:4px;background:var(--gold);color:var(--dark);}
+.team-budget{margin-top:12px;padding-top:10px;border-top:1px solid var(--rule);font-family:var(--mono);font-size:12px;color:var(--muted);}
+.team-budget strong{color:var(--green);}
+.lookup-spin{display:inline-block;width:13px;height:13px;border:2px solid rgba(45,80,22,.2);border-top-color:var(--green);border-radius:50%;animation:sp .65s linear infinite;vertical-align:middle;margin-right:6px;}
 </style>
 </head>
 <body>
@@ -192,6 +211,8 @@ header h1 span{color:var(--lime);}
     <div class="tabs">
       <button class="tbtn on"  onclick="switchTab('pick',this)">Pick Players</button>
       <button class="tbtn"     onclick="switchTab('lb',this)">Leaderboard</button>
+      <!-- ★ NEW TAB -->
+      <button class="tbtn"     onclick="switchTab('myteam',this)">My Team</button>
     </div>
 
     <div class="pane on" id="pane-pick">
@@ -216,6 +237,19 @@ header h1 span{color:var(--lime);}
 
     <div class="pane" id="pane-lb">
       <div id="lbWrap"><p class="lbempty">Loading leaderboard…</p></div>
+    </div>
+
+    <!-- ★ NEW PANE -->
+    <div class="pane" id="pane-myteam">
+      <div class="myteam-lookup">
+        <p class="lookup-hint">Enter the email address you used when submitting your team to view your XI.</p>
+        <div class="lookup-row">
+          <input class="finput lookup-input" id="lookupEmail" type="email"
+                 placeholder="you@example.com" autocomplete="email">
+          <button class="lookup-btn" onclick="lookupTeam()">Find My Team</button>
+        </div>
+        <div id="lookupResult"></div>
+      </div>
     </div>
   </div>
 
@@ -278,29 +312,27 @@ header h1 span{color:var(--lime);}
 // ═══════════════════════════════════════════════════
 //  CONFIG
 // ═══════════════════════════════════════════════════
-const API_URL      = "https://script.google.com/macros/s/AKfycbwXcjfMR6s718m29t4P9kBlnwsGYKvB9HDAMM0RT9dIGu7HJ3M4fSgWga3Yf6qLv1K3Ww/exec";
-const BUDGET       = 100;
-const SQUAD_SIZE   = 11;
+const API_URL       = "https://script.google.com/macros/s/AKfycbwXcjfMR6s718m29t4P9kBlnwsGYKvB9HDAMM0RT9dIGu7HJ3M4fSgWga3Yf6qLv1K3Ww/exec";
+const BUDGET        = 100;
+const SQUAD_SIZE    = 11;
 const MIN_PER_SQUAD = 2;
-const ROLE_LIMITS  = {
-  "Wicketkeeper": { min:1, max:99,  abbr:"WK"  },
+const ROLE_LIMITS   = {
+  "Wicketkeeper": { min:1, max:99, abbr:"WK"  },
   "Batter":       { min:3, max:99, abbr:"BAT" },
   "All-Rounder":  { min:2, max:99, abbr:"AR"  },
   "Bowler":       { min:3, max:99, abbr:"BWL" },
 };
 // ═══════════════════════════════════════════════════
 
-let players      = [];   // full player list from API
-let selected     = [];   // array of player IDs (ordered)
+let players      = [];
+let selected     = [];
 let captainId    = null;
 let activeFilter = "All";
 
-// ── INIT ──────────────────────────────────────────
 (async function init() {
   await Promise.all([loadPlayers(), loadLeaderboard()]);
 })();
 
-// ── API ───────────────────────────────────────────
 async function apiFetch(payload) {
   const r = await fetch(API_URL, {
     method:  "POST",
@@ -311,7 +343,6 @@ async function apiFetch(payload) {
   return r.json();
 }
 
-// ── PLAYERS ───────────────────────────────────────
 async function loadPlayers() {
   try {
     const res = await apiFetch({ action:"getPlayers" });
@@ -322,11 +353,9 @@ async function loadPlayers() {
   }
 }
 function setTableMsg(msg) {
-  document.getElementById("tableWrap").innerHTML =
-    '<p class="empty">' + esc(msg) + "</p>";
+  document.getElementById("tableWrap").innerHTML = '<p class="empty">' + esc(msg) + "</p>";
 }
 
-// ── LEADERBOARD ───────────────────────────────────
 async function loadLeaderboard() {
   try {
     const res = await apiFetch({ action:"getLeaderboard" });
@@ -349,7 +378,6 @@ function renderLB(lb) {
   }).join("");
 }
 
-// ── TABS ──────────────────────────────────────────
 function switchTab(name, btn) {
   document.querySelectorAll(".tbtn").forEach(function(b){ b.classList.remove("on"); });
   document.querySelectorAll(".pane").forEach(function(p){ p.classList.remove("on"); });
@@ -357,7 +385,6 @@ function switchTab(name, btn) {
   document.getElementById("pane-" + name).classList.add("on");
 }
 
-// ── FILTER ────────────────────────────────────────
 function setFilter(role, btn) {
   activeFilter = role;
   document.querySelectorAll(".fbtn").forEach(function(b){ b.classList.remove("on"); });
@@ -365,14 +392,10 @@ function setFilter(role, btn) {
   renderTable();
 }
 
-// ── RENDER TABLE ──────────────────────────────────
-// Uses DOM construction (no innerHTML for interactive elements)
-// so there is zero chance of attribute-escaping bugs breaking onclick.
 function renderTable() {
   var query  = (document.getElementById("searchBox").value || "").toLowerCase();
   var spent  = getSpent();
   var canAdd = selected.length < SQUAD_SIZE;
-
   var filtered = players.filter(function(p) {
     var roleOk  = activeFilter === "All" || p.role === activeFilter;
     var queryOk = !query
@@ -380,17 +403,13 @@ function renderTable() {
       || (p.squad||"").toLowerCase().indexOf(query) !== -1;
     return roleOk && queryOk;
   });
-
   var wrap = document.getElementById("tableWrap");
   if (!filtered.length) {
     wrap.innerHTML = '<p class="empty">No players match your search.</p>';
     return;
   }
-
-  // Build table using DOM API — 100% safe, no escaping issues
   var table = document.createElement("table");
   table.className = "ptable";
-
   var thead = table.createTHead();
   var hrow  = thead.insertRow();
   ["Player","Role","Price","Pick"].forEach(function(txt, i) {
@@ -399,67 +418,43 @@ function renderTable() {
     if (i === 3) th.className = "c";
     hrow.appendChild(th);
   });
-
   var tbody = table.createTBody();
-
   filtered.forEach(function(p) {
     var isSel     = selected.indexOf(p.id) !== -1;
     var canAfford = isSel || (spent + p.price) <= BUDGET;
     var cant      = !isSel && (!canAdd || !canAfford);
     var abbr      = (ROLE_LIMITS[p.role] || {}).abbr || p.role;
-
     var tr = tbody.insertRow();
     if (isSel) tr.classList.add("sel");
     if (cant)  tr.classList.add("dim");
-
-    // Player name + squad
     var td1 = tr.insertCell();
     var nameDiv = document.createElement("div");
-    nameDiv.className   = "pname";
-    nameDiv.textContent = p.name;
-    td1.appendChild(nameDiv);
+    nameDiv.className = "pname"; nameDiv.textContent = p.name; td1.appendChild(nameDiv);
     if (p.squad) {
       var sqDiv = document.createElement("div");
-      sqDiv.className   = "psquad";
-      sqDiv.textContent = p.squad;
-      td1.appendChild(sqDiv);
+      sqDiv.className = "psquad"; sqDiv.textContent = p.squad; td1.appendChild(sqDiv);
     }
-
-    // Role badge
-    var td2   = tr.insertCell();
+    var td2 = tr.insertCell();
     var badge = document.createElement("span");
-    badge.className   = "rbadge r-" + abbr;
-    badge.textContent = abbr;
-    td2.appendChild(badge);
-
-    // Price
+    badge.className = "rbadge r-" + abbr; badge.textContent = abbr; td2.appendChild(badge);
     var td3 = tr.insertCell();
-    td3.className   = "pprice";
-    td3.textContent = "£" + p.price.toFixed(1);
-
-    // Pick button — built purely in JS, no innerHTML, no string escaping
+    td3.className = "pprice"; td3.textContent = "\u00a3" + p.price.toFixed(1);
     var td4 = tr.insertCell();
     td4.className = "pcell";
     var btn = document.createElement("button");
-    btn.type      = "button";
+    btn.type = "button";
     btn.className = "pbtn" + (isSel ? " picked" : "") + (cant ? " cant" : "");
-    btn.textContent = isSel ? "✓" : "+";
-    btn.title       = isSel ? "Remove from XI" : cant ? "Can't add" : "Add to XI";
-    // Capture p.id in closure — no string interpolation risk
+    btn.textContent = isSel ? "\u2713" : "+";
+    btn.title = isSel ? "Remove from XI" : cant ? "Can't add" : "Add to XI";
     (function(pid) {
-      btn.addEventListener("click", function(e) {
-        e.stopPropagation();
-        togglePlayer(pid);
-      });
+      btn.addEventListener("click", function(e) { e.stopPropagation(); togglePlayer(pid); });
     }(p.id));
     td4.appendChild(btn);
   });
-
   wrap.innerHTML = "";
   wrap.appendChild(table);
 }
 
-// ── TOGGLE ────────────────────────────────────────
 function togglePlayer(id) {
   var idx = selected.indexOf(id);
   if (idx !== -1) {
@@ -467,33 +462,24 @@ function togglePlayer(id) {
     if (captainId === id) captainId = null;
   } else {
     if (selected.length >= SQUAD_SIZE) return;
-    var p = getPlayer(id);
-    if (!p) return;
+    var p = getPlayer(id); if (!p) return;
     if (getSpent() + p.price > BUDGET) return;
     selected.push(id);
   }
   update();
 }
 
-// ── CAPTAIN ───────────────────────────────────────
 function setCaptain(id) {
   captainId = (captainId === id) ? null : id;
   update();
 }
 
-// ── UPDATE ────────────────────────────────────────
 function update() {
-  updateBudget();
-  updateRoles();
-  updateSquadList();
-  renderTable();
-  updateSubmit();
+  updateBudget(); updateRoles(); updateSquadList(); renderTable(); updateSubmit();
 }
 
 function getPlayer(id) {
-  for (var i = 0; i < players.length; i++) {
-    if (players[i].id === id) return players[i];
-  }
+  for (var i = 0; i < players.length; i++) { if (players[i].id === id) return players[i]; }
   return null;
 }
 function getSpent() {
@@ -503,178 +489,160 @@ function getSpent() {
 }
 
 function updateBudget() {
-  var spent = getSpent();
-  var over  = spent > BUDGET;
-  var pct   = Math.min((spent/BUDGET)*100, 100);
-  document.getElementById("bfig").textContent = "£" + spent.toFixed(1) + " / £" + BUDGET + "m";
+  var spent = getSpent(), over = spent > BUDGET;
+  document.getElementById("bfig").textContent = "\u00a3" + spent.toFixed(1) + " / \u00a3" + BUDGET + "m";
   document.getElementById("bfig").className   = "bfig" + (over ? " over" : "");
-  document.getElementById("bfill").style.width = pct + "%";
+  document.getElementById("bfill").style.width = Math.min((spent/BUDGET)*100,100) + "%";
   document.getElementById("bfill").className   = "bfill" + (over ? " over" : "");
   document.getElementById("scnt").textContent  = selected.length;
 }
 
 function updateRoles() {
   var counts = {};
-  selected.forEach(function(id) {
-    var p = getPlayer(id);
-    if (p) counts[p.role] = (counts[p.role]||0) + 1;
-  });
+  selected.forEach(function(id) { var p = getPlayer(id); if (p) counts[p.role] = (counts[p.role]||0)+1; });
   Object.keys(ROLE_LIMITS).forEach(function(role) {
-    var cfg  = ROLE_LIMITS[role];
-    var n    = counts[role] || 0;
-    var full = selected.length === SQUAD_SIZE;
+    var cfg = ROLE_LIMITS[role], n = counts[role]||0, full = selected.length === SQUAD_SIZE;
     document.getElementById("cnt-" + cfg.abbr).textContent = n;
     var chip = document.getElementById("chip-" + cfg.abbr);
     var cls  = "rchip";
-    if (n > 0) {
-      if (n >= cfg.min && n <= cfg.max) cls += " ok";
-      else cls += full ? " err" : " warn";
-    }
+    if (n > 0) { if (n >= cfg.min && n <= cfg.max) cls += " ok"; else cls += full ? " err" : " warn"; }
     chip.className = cls;
   });
 }
 
 function updateSquadList() {
-  var list  = document.getElementById("squadList");
-  var tally = document.getElementById("tally");
-
+  var list = document.getElementById("squadList"), tally = document.getElementById("tally");
   if (!selected.length) {
-    list.innerHTML  = '<li class="sqempty">No players selected yet.</li>';
-    tally.innerHTML = "";
-    return;
+    list.innerHTML = '<li class="sqempty">No players selected yet.</li>';
+    tally.innerHTML = ""; return;
   }
-
-  // Build list with DOM API to avoid onclick-in-string issues
   list.innerHTML = "";
   selected.forEach(function(id) {
-    var p = getPlayer(id);
-    if (!p) return;
+    var p = getPlayer(id); if (!p) return;
     var isCap = captainId === id;
-
-    var li = document.createElement("li");
-    li.className = "sqitem";
-
-    var info = document.createElement("div");
-    info.style.flex = "1";
-    var nm = document.createElement("span");
-    nm.className   = "sqname";
-    nm.textContent = p.name;
-    info.appendChild(nm);
-    if (p.squad) {
-      var sq = document.createElement("span");
-      sq.className   = "sqsquad";
-      sq.textContent = p.squad;
-      info.appendChild(sq);
-    }
+    var li = document.createElement("li"); li.className = "sqitem";
+    var info = document.createElement("div"); info.style.flex = "1";
+    var nm = document.createElement("span"); nm.className = "sqname"; nm.textContent = p.name; info.appendChild(nm);
+    if (p.squad) { var sq = document.createElement("span"); sq.className = "sqsquad"; sq.textContent = p.squad; info.appendChild(sq); }
     li.appendChild(info);
-
-    var capBtn = document.createElement("button");
-    capBtn.type      = "button";
-    capBtn.className = "capbtn" + (isCap ? " iscap" : "");
-    capBtn.textContent = "C";
-    capBtn.title     = isCap ? "Remove captain" : "Set as captain (×2 pts)";
-    (function(pid) {
-      capBtn.addEventListener("click", function() { setCaptain(pid); });
-    }(id));
+    var capBtn = document.createElement("button"); capBtn.type = "button";
+    capBtn.className = "capbtn" + (isCap ? " iscap" : ""); capBtn.textContent = "C";
+    capBtn.title = isCap ? "Remove captain" : "Set as captain (\u00d72 pts)";
+    (function(pid){ capBtn.addEventListener("click", function(){ setCaptain(pid); }); }(id));
     li.appendChild(capBtn);
-
-    var rmBtn = document.createElement("button");
-    rmBtn.type      = "button";
-    rmBtn.className = "rmbtn";
-    rmBtn.textContent = "×";
-    rmBtn.title     = "Remove " + p.name;
-    (function(pid) {
-      rmBtn.addEventListener("click", function() { togglePlayer(pid); });
-    }(id));
+    var rmBtn = document.createElement("button"); rmBtn.type = "button";
+    rmBtn.className = "rmbtn"; rmBtn.textContent = "\u00d7"; rmBtn.title = "Remove " + p.name;
+    (function(pid){ rmBtn.addEventListener("click", function(){ togglePlayer(pid); }); }(id));
     li.appendChild(rmBtn);
-
     list.appendChild(li);
   });
-
-  // Per-squad tally
   var squadCounts = {};
-  selected.forEach(function(id) {
-    var p = getPlayer(id);
-    if (p && p.squad) squadCounts[p.squad] = (squadCounts[p.squad]||0) + 1;
-  });
+  selected.forEach(function(id) { var p = getPlayer(id); if (p && p.squad) squadCounts[p.squad] = (squadCounts[p.squad]||0)+1; });
   var parts = Object.keys(squadCounts).map(function(sq) {
     var c = squadCounts[sq];
-    return '<span class="' + (c >= MIN_PER_SQUAD ? "ok" : "bad") + '">'
-      + esc(sq) + ": " + c + "</span>";
+    return '<span class="' + (c >= MIN_PER_SQUAD ? "ok" : "bad") + '">' + esc(sq) + ": " + c + "</span>";
   });
-  tally.innerHTML = parts.length ? "Per squad: " + parts.join(" · ") : "";
+  tally.innerHTML = parts.length ? "Per squad: " + parts.join(" \u00b7 ") : "";
 }
 
 function updateSubmit() {
   var btn = document.getElementById("submitBtn");
   if (btn.classList.contains("done")) return;
   var counts = {};
-  selected.forEach(function(id) {
-    var p = getPlayer(id); if (p) counts[p.role] = (counts[p.role]||0)+1;
-  });
+  selected.forEach(function(id) { var p = getPlayer(id); if (p) counts[p.role] = (counts[p.role]||0)+1; });
   var rolesOk = Object.keys(ROLE_LIMITS).every(function(role) {
     var n = counts[role]||0; return n >= ROLE_LIMITS[role].min && n <= ROLE_LIMITS[role].max;
   });
   var sc = {};
-  selected.forEach(function(id) {
-    var p = getPlayer(id); if (p && p.squad) sc[p.squad] = (sc[p.squad]||0)+1;
-  });
+  selected.forEach(function(id) { var p = getPlayer(id); if (p && p.squad) sc[p.squad] = (sc[p.squad]||0)+1; });
   var squadOk = Object.keys(sc).every(function(s){ return sc[s] >= MIN_PER_SQUAD; });
-  btn.disabled = !(
-    selected.length === SQUAD_SIZE && captainId &&
-    getSpent() <= BUDGET && rolesOk && squadOk
-  );
+  btn.disabled = !(selected.length === SQUAD_SIZE && captainId && getSpent() <= BUDGET && rolesOk && squadOk);
 }
 
-// ── SUBMIT ────────────────────────────────────────
 async function submitTeam() {
   var name   = document.getElementById("managerName").value.trim();
   var email  = document.getElementById("managerEmail").value.trim();
   var tname  = document.getElementById("teamName").value.trim();
   var msgBox = document.getElementById("msgBox");
-
   document.getElementById("managerName").classList.remove("err");
   document.getElementById("managerEmail").classList.remove("err");
   var fieldErr = false;
   if (!name)  { document.getElementById("managerName").classList.add("err");  fieldErr = true; }
-  if (!email || email.indexOf("@") === -1) {
-    document.getElementById("managerEmail").classList.add("err"); fieldErr = true;
-  }
+  if (!email || email.indexOf("@") === -1) { document.getElementById("managerEmail").classList.add("err"); fieldErr = true; }
   if (fieldErr) {
     msgBox.innerHTML = '<div class="msg msg-err">Please fill in your name and a valid email address.</div>';
     return;
   }
-
   var btn = document.getElementById("submitBtn");
   btn.disabled = true;
-  btn.innerHTML = '<span class="spin"></span>Submitting…';
+  btn.innerHTML = '<span class="spin"></span>Submitting\u2026';
   msgBox.innerHTML = "";
-
   try {
     var res = await apiFetch({
-      action:         "submit",
-      submitterName:  name,
-      submitterEmail: email.toLowerCase(),
-      teamName:       tname || name + "'s XI",
-      playerIds:      selected.slice(),
-      captainId:      captainId,
+      action: "submit", submitterName: name, submitterEmail: email.toLowerCase(),
+      teamName: tname || name + "'s XI", playerIds: selected.slice(), captainId: captainId,
     });
     if (res.success) {
-      msgBox.innerHTML = '<div class="msg msg-ok">✓ <strong>Team submitted!</strong><br>' + esc(res.message) + "</div>";
-      btn.textContent = "Team Submitted ✓";
-      btn.classList.add("done");
+      msgBox.innerHTML = '<div class="msg msg-ok">\u2713 <strong>Team submitted!</strong><br>' + esc(res.message) + "</div>";
+      btn.textContent = "Team Submitted \u2713"; btn.classList.add("done");
     } else {
       var errs = res.errors
         ? "<ul>" + res.errors.map(function(e){ return "<li>" + esc(e) + "</li>"; }).join("") + "</ul>"
         : esc(res.error || "Unknown server error.");
       msgBox.innerHTML = '<div class="msg msg-err"><strong>Submission failed:</strong>' + errs + "</div>";
-      btn.disabled = false;
-      btn.textContent = "Submit Team";
+      btn.disabled = false; btn.textContent = "Submit Team";
     }
   } catch(e) {
-    msgBox.innerHTML = '<div class="msg msg-err">Network error — please try again.</div>';
-    btn.disabled = false;
-    btn.textContent = "Submit Team";
+    msgBox.innerHTML = '<div class="msg msg-err">Network error \u2014 please try again.</div>';
+    btn.disabled = false; btn.textContent = "Submit Team";
+  }
+}
+
+// ── MY TEAM LOOKUP ────────────────────────────────
+// ★ NEW FUNCTION — calls getTeam action on the backend
+async function lookupTeam() {
+  var email  = document.getElementById("lookupEmail").value.trim().toLowerCase();
+  var result = document.getElementById("lookupResult");
+
+  if (!email || email.indexOf("@") === -1) {
+    result.innerHTML = '<div class="msg msg-err">Please enter a valid email address.</div>';
+    return;
+  }
+
+  // Show loading state
+  result.innerHTML = '<p style="color:var(--muted);font-size:13px"><span class="lookup-spin"></span>Looking up your team\u2026</p>';
+
+  try {
+    var res = await apiFetch({ action: "getTeam", email: email });
+
+    if (!res.success) {
+      result.innerHTML = '<div class="msg msg-err">'
+        + (res.error || "No team found for that email address.") + '</div>';
+      return;
+    }
+
+    // Build player list from the returned data
+    var playerRows = (res.playerNames || "").split(",").map(function(name) {
+      name = name.trim();
+      var isCap = name === res.captainName;
+      return '<li class="team-player-item">'
+        + '<span class="team-player-name">' + esc(name) + '</span>'
+        + (isCap ? '<span class="cap-badge">CAPTAIN</span>' : '')
+        + '</li>';
+    }).join("");
+
+    result.innerHTML =
+      '<div class="team-card">'
+      + '<div class="team-card-header">'
+      + '<div class="team-card-name">' + esc(res.teamName) + '</div>'
+      + '<div class="team-card-meta">' + esc(res.submitterName) + ' \u00b7 submitted ' + esc(res.timestamp) + '</div>'
+      + '</div>'
+      + '<ul class="team-player-list">' + playerRows + '</ul>'
+      + '<div class="team-budget">Budget spent: <strong>\u00a3' + Number(res.totalPrice).toFixed(1) + 'm</strong> / \u00a3' + BUDGET + 'm</div>'
+      + '</div>';
+
+  } catch(e) {
+    result.innerHTML = '<div class="msg msg-err">Network error \u2014 please try again.</div>';
   }
 }
 
